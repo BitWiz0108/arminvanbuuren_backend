@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "paths": {
+      "@admin/*": ["src/admin/*"],
+      "@fanclub/*": ["src/fanclub/*"],
+      "@common/*": ["src/common/*"],
+      "@models/*": ["src/common/database/models/*"],
+      "@config/*": ["src/config/*"],
+      "@common-modules/*": ["src/common/modules/*"],
+    },
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false
+  }
+}
