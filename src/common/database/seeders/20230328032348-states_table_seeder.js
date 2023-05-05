@@ -2,19 +2,18 @@
 
 const fs = require('fs');
 const path = require('path');
-const csv = require('csv-parser');
+const JSONStream = require('JSONStream');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const csvFilePath = path.join(__dirname, 'csv/all_states.csv');
+    const jsonFilePath = path.join(__dirname, 'json/states.json');
 
     const states = [];
 
     return new Promise((resolve, reject) => {
-      fs.createReadStream(csvFilePath)
-        .pipe(csv())
+      fs.createReadStream(jsonFilePath)
+        .pipe(JSONStream.parse('*'))
         .on('data', (data) => {
-          // Map CSV fields to model attributes
           states.push({
             name: data.name,
             country_id: data.country_id,
