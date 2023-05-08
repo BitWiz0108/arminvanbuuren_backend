@@ -45,7 +45,7 @@ export class AdminGalleryService {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
 
-    if (imageFile) {
+    if (imageFile?.size) {
       data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
       data.compressedImage = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
     }
