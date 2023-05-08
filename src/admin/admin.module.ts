@@ -23,6 +23,7 @@ import { AdminTOSModule } from './tos/admin.tos.module';
 import { AdminGalleryModule } from './gallery/admin.gallery.module';
 import { AdminHomeModule } from './home/admin.home.module';
 import { AdminAboutModule } from './about/admin.about.module';
+import { AdminPaymentGatewayModule } from './payment-gateway/admin.payment-gateway.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { AdminAboutModule } from './about/admin.about.module';
     AdminAboutModule,
     AdminGalleryModule,
     AdminHomeModule,
+    AdminPaymentGatewayModule,
   ],
   controllers: [],
   providers: [

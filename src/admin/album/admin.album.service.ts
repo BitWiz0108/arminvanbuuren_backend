@@ -26,7 +26,6 @@ export class AdminAlbumService {
     try {
       data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
       
-      console.log('image', data.image);
       const newAlbumItem: Album = await this.albumModel.create({
         image: data.image, // use the CloudFront full file path as the `image` column value
         name: data.name,

@@ -47,4 +47,10 @@ export class AdminLiveStreamController {
     async deleteItem(@Query('id') id: number) {
       await this.livestreamService.remove(id);
     }
+
+    @Delete('delete-comments')
+    @HttpCode(HttpStatus.ACCEPTED)
+    async deleteComments(@Body() data: any) {
+      await this.livestreamService.removeComments(data);
+    }
 }

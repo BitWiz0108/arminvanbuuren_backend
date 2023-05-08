@@ -22,7 +22,7 @@ export class AdminGalleryService {
     };
   }
 
-  async add(data: Gallery, imageFile: Express.Multer.File): Promise<Gallery> {
+  async add(data: Partial<Gallery>, imageFile: Express.Multer.File): Promise<Gallery> {
     try {
       data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
       data.compressedImage = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
@@ -30,10 +30,27 @@ export class AdminGalleryService {
       return await this.galleryModel.create({
         image: data.image,
         compressedImage: data.compressedImage,
+        size: data.size,
+        description: data.description,
       });
     } catch (error) {
       throw new HttpException(MESSAGE.FAILED_UPLOAD_GALLERY, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async update(data: Partial<Gallery>, imageFile: Express.Multer.File): Promise<Gallery> {
+    const item = await this.galleryModel.findByPk(data.id);
+
+    if (!item) {
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
+    }
+
+    if (imageFile) {
+      data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+      data.compressedImage = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
+    }
+
+    return await item.update(data);
   }
 
   async findAll(): Promise<GalleryDto> {

@@ -134,8 +134,8 @@ export class UploadToS3Service {
             const ffprobeOutput = Buffer.concat(chunks).toString();
             const metadata = JSON.parse(ffprobeOutput).streams[0];
 
-            // const videoBitrate = metadata.bit_rate / 10;
-            const videoBitrate = 500;
+            const videoBitrate = metadata.bit_rate / 3;
+            // const videoBitrate = 500;
             const videoCodec = metadata.codec_name;
             const width = metadata.width;
             const height = metadata.height;
@@ -149,8 +149,8 @@ export class UploadToS3Service {
               '-crf', '28',
               '-b:v', `${videoBitrate}`,
               '-bufsize', `1000k`,
-              '-maxrate', '200k',
-              '-vf', `scale=426:240`,
+              // '-maxrate', '700k',
+              '-vf', `scale=800:450`,
               '-y', outputFilePath
             ]);
             

@@ -27,6 +27,7 @@ export const MESSAGE = {
   FAILED_LOAD_ITEM: "Failed to load an item",
   FAILED_LOAD_ARTIST_INFO: "Failed to load artist information",
   NOT_ALLOWED_MULTIPLE_DEFAULT_LANGUAGE: "There can't be 2+ default languages",
+  NEED_PAYMENT_GATEWAY_INITIALIZE: "Need to initialize payment gateway",
 }
 
 export const PASSWORD_RESET_FORM = {

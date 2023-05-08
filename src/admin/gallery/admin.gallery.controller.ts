@@ -21,8 +21,16 @@ export class AdminGalleryController {
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @UseInterceptors(FileInterceptor('imageFile'))
-    async add(@Body() data: Gallery, @UploadedFile() imageFile: Express.Multer.File) {
+    async add(@Body() data: Partial<Gallery>, @UploadedFile() imageFile: Express.Multer.File) {
       const result = await this.galleryService.add(data, imageFile);
+      return result;
+    }
+
+    @Put()
+    @HttpCode(HttpStatus.ACCEPTED)
+    @UseInterceptors(FileInterceptor('imageFile'))
+    async update(@Body() data: Partial<Gallery>, @UploadedFile() imageFile: Express.Multer.File) {
+      const result = await this.galleryService.update(data, imageFile);
       return result;
     }
 

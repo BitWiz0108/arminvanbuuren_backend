@@ -21,6 +21,15 @@ export class Gallery extends Model {
   @Column({ field: 'compressed_image'})
   compressedImage: string;
 
+  @Column
+  description: string;
+
+  @Column({
+    field: 'size',
+    type: DataType.ENUM('SQUARE', 'WIDE', 'TALL', 'WIDEANDTALL'),
+  })
+  size: 'SQUARE' | 'WIDE' | 'TALL' | 'WIDEANDTALL';
+
   @Column({
     field: 'created_at',
     type: DataType.DATE,

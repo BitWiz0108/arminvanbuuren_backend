@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { LiveStream } from '@models/live-stream.entity';
 import { AdminLiveStreamOption } from './dto/live-stream-option';
@@ -6,7 +6,9 @@ import { AdminLiveStreamDto, } from './dto/live-stream-dto';
 import { User } from '@models/user.entity';
 import { Language } from '@models/language.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME } from '@common/constants';
+import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { LiveStreamComment } from '@common/database/models/live-stream-comment.entity';
+import { Identifier } from 'sequelize';
 
 @Injectable()
 export class AdminLiveStreamService {  
@@ -15,6 +17,9 @@ export class AdminLiveStreamService {
   constructor(
     @InjectModel(LiveStream)
     private readonly livestreamModel: typeof LiveStream,
+
+    @InjectModel(LiveStreamComment)
+    private readonly lsCommentModel: typeof LiveStreamComment,
 
     private uploadService: UploadToS3Service,
   ) {
@@ -140,8 +145,18 @@ export class AdminLiveStreamService {
   async remove(id: number): Promise<void> {
     const item = await this.livestreamModel.findByPk(id);
     if (!item) {
-      throw new Error(`LiveStream with id ${id} not found.`);
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
     await item.destroy();
+  }
+
+  async removeComments(data: any): Promise<void> {
+    data.ids.forEach(async (commentId: Identifier) => {
+      const comment = await this.lsCommentModel.findByPk(commentId);
+      if (!comment) {
+        throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
+      }
+      await comment.destroy();
+    });
   }
 }

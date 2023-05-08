@@ -9,16 +9,12 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.createTable('gallery', { 
+    await queryInterface.createTable('payment_gateways', { 
       id: { type: Sequelize.INTEGER, allowNull: false, autoIncrement: true, unique: true, primaryKey: true, },
-      image: { type: Sequelize.STRING, allowNull: false, },
-      compressed_image: { type: Sequelize.STRING, allowNull: false, },
-      size: {
-        type: Sequelize.ENUM('SQUARE', 'WIDE', 'TALL', 'WIDEANDTALL'),
-      },
-      description: { type: Sequelize.TEXT, },
-      created_at: { type: Sequelize.DATE, allowNull: false, },
-      updated_at: { type: Sequelize.DATE, allowNull: false, },
+      paypalClientId: { type: Sequelize.STRING, },
+      paypalClientSecret: { type: Sequelize.STRING, },
+      stripePublicApiKey: { type: Sequelize.STRING, },
+      stripeSecretKey: { type: Sequelize.STRING, },
     });
   },
 
@@ -29,6 +25,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.dropTable('gallery');
+    await queryInterface.dropTable('payment_gateways');
   }
 };

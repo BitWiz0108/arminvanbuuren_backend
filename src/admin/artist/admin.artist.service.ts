@@ -86,6 +86,7 @@ export class AdminArtistService {
         bannerImage: artist.bannerImage,
         avatarImage: artist.avatarImage,
         logoImage: artist.logoImage,
+        mobile: artist.mobile,
         facebook: artist.facebook,
         instagram: artist.instagram,
         youtube: artist.youtube,

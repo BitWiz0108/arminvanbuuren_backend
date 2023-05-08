@@ -12,6 +12,7 @@ export class AdminArtistInfoDto {
   bannerImage: string;
   avatarImage: string;
   logoImage: string;
+  mobile: string;
   facebook: string;
   instagram: string;
   youtube: string;

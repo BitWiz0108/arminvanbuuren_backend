@@ -5,7 +5,9 @@ import { PostListOption, PostPartialDto, PostPayloadDto } from './dto/post-optio
 import { AdminPostPaginatedDto } from './dto/post.dto';
 import { User } from '@models/user.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME } from '@common/constants';
+import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { Reply } from '@common/database/models/reply.entity';
+import { Identifier } from 'sequelize/types/model';
 
 @Injectable()
 export class AdminPostService {
@@ -14,6 +16,9 @@ export class AdminPostService {
   constructor(
     @InjectModel(Post)
     private readonly postModel: typeof Post,
+
+    @InjectModel(Reply)
+    private readonly replyModel: typeof Reply,
 
     private uploadService: UploadToS3Service,
   ) {
@@ -94,8 +99,18 @@ export class AdminPostService {
   async remove(id: number): Promise<void> {
     const item = await this.postModel.findByPk(id);
     if (!item) {
-      throw new HttpException(`Post with id ${id} not found.`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
     await item.destroy();
+  }
+
+  async removeReplies(data: any): Promise<void> {
+    data.ids.forEach(async (replyId: Identifier) => {
+      const reply = await this.replyModel.findByPk(replyId);
+      if (!reply) {
+        throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
+      }
+      await reply.destroy();
+    });
   }
 }

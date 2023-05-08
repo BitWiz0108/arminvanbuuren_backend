@@ -10,43 +10,49 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @UseGuards(AdminGuard)
 @Controller(`${process.env.API_VERSION}/admin/post`)
 export class AdminPostController {
-    constructor(private readonly postService: AdminPostService) {}
+  constructor(private readonly postService: AdminPostService) {}
 
-    @Get()
-    @HttpCode(HttpStatus.OK)
-    async findAll(
-      @Query('page') page: number, @Query('limit') limit: number
-    ) {
-      return this.postService.findAll({ page, limit });
-    }
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async findAll(
+    @Query('page') page: number, @Query('limit') limit: number
+  ) {
+    return this.postService.findAll({ page, limit });
+  }
 
-    @Post()
-    @HttpCode(HttpStatus.CREATED)
-    @UseInterceptors(FileInterceptor('imageFile'))
-    async add(
-      @Body() data: PostPayloadDto, 
-      @UploadedFile() imageFile: Express.Multer.File,
-    ) {
-      return this.postService.add(data, imageFile);
-    }
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('imageFile'))
+  async add(
+    @Body() data: PostPayloadDto, 
+    @UploadedFile() imageFile: Express.Multer.File,
+  ) {
+    return this.postService.add(data, imageFile);
+  }
 
-    @Put()
-    @HttpCode(HttpStatus.ACCEPTED)
-    @UseInterceptors(FileInterceptor('imageFile'))
-    async update(
-      @Body() data: PostPartialDto,
-      @UploadedFile() imageFile: Express.Multer.File,
-    ) {
-      const post = await this.postService.update(
-        data,
-        imageFile,
-      );
-      return post;
-    }
+  @Put()
+  @HttpCode(HttpStatus.ACCEPTED)
+  @UseInterceptors(FileInterceptor('imageFile'))
+  async update(
+    @Body() data: PostPartialDto,
+    @UploadedFile() imageFile: Express.Multer.File,
+  ) {
+    const post = await this.postService.update(
+      data,
+      imageFile,
+    );
+    return post;
+  }
 
-    @Delete()
-    @HttpCode(HttpStatus.ACCEPTED)
-    async deleteItem(@Query('id') id: number) {
-      await this.postService.remove(id);
-    }
+  @Delete()
+  @HttpCode(HttpStatus.ACCEPTED)
+  async deleteItem(@Query('id') id: number) {
+    await this.postService.remove(id);
+  }
+
+  @Delete('delete-replies')
+  @HttpCode(HttpStatus.ACCEPTED)
+  async deleteReplies(@Body() data: any) {
+    await this.postService.removeReplies(data);
+  }
 }

@@ -7,7 +7,7 @@ import { Plan } from '@common/database/models/plan.entity';
 import { Country } from '@common/database/models/country.entity';
 import { City } from '@common/database/models/city.entity';
 import { State } from '@common/database/models/state.entity';
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME } from '@common/constants';
+import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 
 @Injectable()
@@ -52,7 +52,7 @@ export class ProfileService {
   async update(data: Partial<User>, avatarImageFile: Express.Multer.File): Promise<User> {
     const profile = await this.profileModel.findByPk(data.id);
     if (!profile) {
-      throw new HttpException(`Profile with id ${data.id} not found.`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
 
     if (avatarImageFile) {
@@ -74,25 +74,29 @@ export class ProfileService {
   }
 
   async getAllCountries(): Promise<Country[]> {
-    const countries: Country[] = await this.countryModel.findAll();
+    const countries: Country[] = await this.countryModel.findAll({
+      order: [['name', 'ASC']],
+    });
     return countries;
   }
 
   async getAllStatesByCountryId(countryId: number): Promise<State[]> {
-    const country = await this.countryModel.findByPk(Number(countryId), {
-      include: [
-        { model: State, as: 'states'}
-      ]
+    const states = await this.stateModel.findAll({
+      where: {
+        countryId: countryId,
+      },
+      order: [['name', 'ASC']]
     });
-    return country.states;
+    return states;
   }
 
   async getAllCitiesByStateId(stateId: number): Promise<City[]> {
-    const state = await this.stateModel.findByPk(Number(stateId), {
-      include: [
-        { model: City, as: 'cities'}
-      ]
+    const cities = await this.cityModel.findAll({
+      where: {
+        stateId: stateId,
+      },
+      order: [['name', 'ASC']],
     });
-    return state.cities;
+    return cities;
   }
 }

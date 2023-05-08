@@ -35,10 +35,10 @@ export class FinanceService {
       },
     });
     const paypalClient = new paypal.core.PayPalHttpClient(
-      process.env.IS_PRODUCTION == '1' ? 
+      // process.env.IS_PRODUCTION == '1' ? 
       new paypal.core.LiveEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
-      :
-      new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
+      // :
+      // new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
     );
     
     this.paypal = paypalClient;
