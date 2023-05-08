@@ -8,9 +8,6 @@ import { Language } from '@models/language.entity';
 import { ROLES } from '@common-modules/auth/role.enum';
 import { Music } from '@models/music.entity';
 import { LiveStream } from '@models/live-stream.entity';
-import { City } from '@models/city.entity';
-import { State } from '@models/state.entity';
-import { Country } from '@models/country.entity';
 import { Post } from '@models/post.entity';
 import { Reply } from '@models/reply.entity';
 import { PostLike } from '@models/post-like.entity';
@@ -51,9 +48,6 @@ export class FanclubService {
         { model: Album, as: 'albums' },
         { model: Music, as: 'musics' },
         { model: LiveStream, as: 'livestreams' },
-        { model: City, as: 'city' },
-        { model: State, as: 'state' },
-        { model: Country, as: 'country' },
       ]
     });
 

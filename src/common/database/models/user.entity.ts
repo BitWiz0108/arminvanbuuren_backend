@@ -15,9 +15,6 @@ import { Favorite } from './favorite.entity';
 import { LiveStream } from './live-stream.entity';
 import { Music } from './music.entity';
 import { Role } from './role.entity';
-import { Country } from './country.entity';
-import { State } from './state.entity';
-import { City } from './city.entity';
 import { Album } from './album.entity';
 import { ArtistGenre } from './artist-genre.entity';
 import { Plan } from './plan.entity';
@@ -137,26 +134,14 @@ export class User extends Model {
   @Column
   address: string;
 
-  @ForeignKey(() => Country)
-  @Column({ field: 'country_id' })
-  countryId: number;
+  @Column
+  country: string;
 
-  @BelongsTo(() => Country)
-  country: Country;
+  @Column
+  state: string;
 
-  @ForeignKey(() => State)
-  @Column({ field: 'state_id' })
-  stateId: number;
-
-  @BelongsTo(() => State)
-  state: State;
-
-  @ForeignKey(() => City)
-  @Column({ field: 'city_id' })
-  cityId: number;
-
-  @BelongsTo(() => City)
-  city: City;
+  @Column
+  city: string;
 
   @Column
   zipcode: string;

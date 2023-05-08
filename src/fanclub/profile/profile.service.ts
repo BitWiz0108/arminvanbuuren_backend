@@ -4,9 +4,6 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Role } from '@common/database/models/role.entity';
 import { ArtistGenre } from '@common/database/models/artist-genre.entity';
 import { Plan } from '@common/database/models/plan.entity';
-import { Country } from '@common/database/models/country.entity';
-import { City } from '@common/database/models/city.entity';
-import { State } from '@common/database/models/state.entity';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 
@@ -17,15 +14,6 @@ export class ProfileService {
   constructor(
     @InjectModel(User)
     private readonly profileModel: typeof User,
-
-    @InjectModel(Country)
-    private readonly countryModel: typeof Country,
-
-    @InjectModel(State)
-    private readonly stateModel: typeof State,
-    
-    @InjectModel(City)
-    private readonly cityModel: typeof City,
 
     private uploadService: UploadToS3Service,
   ) {
@@ -42,9 +30,6 @@ export class ProfileService {
         { model: Role, as: 'role' },
         { model: ArtistGenre, as: 'genre' },
         { model: Plan, as: 'plan' },
-        { model: Country, as: 'country' },
-        { model: State, as: 'state' },
-        { model: City, as: 'city' },
       ]
     });
   }
@@ -66,37 +51,7 @@ export class ProfileService {
         { model: Role, as: 'role' },
         { model: ArtistGenre, as: 'genre' },
         { model: Plan, as: 'plan' },
-        { model: Country, as: 'country' },
-        { model: State, as: 'state' },
-        { model: City, as: 'city' },
       ]
     });
-  }
-
-  async getAllCountries(): Promise<Country[]> {
-    const countries: Country[] = await this.countryModel.findAll({
-      order: [['name', 'ASC']],
-    });
-    return countries;
-  }
-
-  async getAllStatesByCountryId(countryId: number): Promise<State[]> {
-    const states = await this.stateModel.findAll({
-      where: {
-        countryId: countryId,
-      },
-      order: [['name', 'ASC']]
-    });
-    return states;
-  }
-
-  async getAllCitiesByStateId(stateId: number): Promise<City[]> {
-    const cities = await this.cityModel.findAll({
-      where: {
-        stateId: stateId,
-      },
-      order: [['name', 'ASC']],
-    });
-    return cities;
   }
 }

@@ -5,9 +5,6 @@ import { UserViewOption } from './dto/user-option-dto';
 import { ArtistGenre } from '@common/database/models/artist-genre.entity';
 import { Role } from '@common/database/models/role.entity';
 import { Plan } from '@common/database/models/plan.entity';
-import { Country } from '@common/database/models/country.entity';
-import { State } from '@common/database/models/state.entity';
-import { City } from '@common/database/models/city.entity';
 import { AdminUsersPaginatedDto } from './dto/user.dto';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME } from '@common/constants';
@@ -39,9 +36,6 @@ export class AdminUserService {
       include: [
         { model: Role, as: 'role', },
         { model: Plan, as: 'plan', },
-        { model: Country, as: 'country', },
-        { model: State, as: 'state', },
-        { model: City, as: 'city', },
       ]
     });
 
@@ -72,9 +66,6 @@ export class AdminUserService {
         { model: Role, as: 'role' },
         { model: ArtistGenre, as: 'genre' },
         { model: Plan, as: 'plan' },
-        { model: Country, as: 'country' },
-        { model: State, as: 'state' },
-        { model: City, as: 'city' },
       ]
     });
   }

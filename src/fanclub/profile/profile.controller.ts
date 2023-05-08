@@ -32,24 +32,4 @@ export class ProfileController {
     );
   }
 
-  @Roles()
-  @Get('countries')
-  @HttpCode(HttpStatus.OK)
-  async getAllCountries() {
-    return this.profileService.getAllCountries();
-  }
-
-  @Roles()
-  @Get('states')
-  @HttpCode(HttpStatus.OK)
-  async getAllStatesByCountryId(@Query('countryId') countryId: number) {
-    return this.profileService.getAllStatesByCountryId(countryId);
-  }
-
-  @Roles()
-  @Get('cities')
-  @HttpCode(HttpStatus.OK)
-  async getAllCitiesByStateId(@Query('stateId') stateId: number) {
-    return this.profileService.getAllCitiesByStateId(stateId);
-  }
 }

@@ -2,9 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '@models/user.entity';
 import { AdminArtistInfoDto } from './dto/artist.dto';
-import { Country } from '@models/country.entity';
-import { State } from '@models/state.entity';
-import { City } from '@models/city.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 
@@ -64,13 +61,7 @@ export class AdminArtistService {
   async getArtistInfo(id: number): Promise<AdminArtistInfoDto> {
     try {
       
-      const artist = await this.artistModel.findByPk(id, {
-        include: [
-          { model: City, as: 'city' },
-          { model: State, as: 'state' },
-          { model: Country, as: 'country' },
-        ]
-      });
+      const artist = await this.artistModel.findByPk(id);
   
       const data: AdminArtistInfoDto = {
         id: artist.id,
@@ -87,6 +78,9 @@ export class AdminArtistService {
         avatarImage: artist.avatarImage,
         logoImage: artist.logoImage,
         mobile: artist.mobile,
+        country: artist.country,
+        state: artist.state,
+        city: artist.city,
         facebook: artist.facebook,
         instagram: artist.instagram,
         youtube: artist.youtube,
