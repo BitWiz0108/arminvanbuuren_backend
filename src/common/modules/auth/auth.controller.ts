@@ -5,7 +5,7 @@ import { User } from '@models/user.entity';
 import { Role } from './role.enum';
 import { Roles } from './roles.decorator';
 import { AuthInput, ForgotPasswordInputDto, PasswordResetInputDto, ResendVerificationLinkInputDto, VerifyEmailInputDto } from './dto/auth.input';
-import { AuthInfo, SigninArgs } from './dto/signin.args';
+import { AuthInfo, OAuthSigninArgs, SigninArgs } from './dto/signin.args';
 import { EMAIL_VERIFY_FORM, MESSAGE, PASSWORD_RESET_FORM } from '@common/constants';
 import { JwtService } from '@nestjs/jwt';
 import * as moment from 'moment';
@@ -53,6 +53,13 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     async signin(@Body() payload: SigninArgs): Promise<AuthInfo> {
         const auth_info = await this.authService.signin(payload);
+        return auth_info;
+    }
+
+    @Post('oauth')
+    @HttpCode(HttpStatus.OK)
+    async oauth(@Body() payload: OAuthSigninArgs): Promise<AuthInfo> {
+        const auth_info = await this.authService.oauth(payload);
         return auth_info;
     }
 
@@ -165,5 +172,11 @@ export class AuthController {
     async getServerTime() {
         const now = moment().format("YYYY-MM-DD HH:mm:ss");
         return { datetime: now };
+    }
+
+    @Post('change-password')
+    @HttpCode(HttpStatus.ACCEPTED)
+    async changePassword(@Body() payload: any) {
+        return await this.authService.updatePassword(payload);
     }
 }

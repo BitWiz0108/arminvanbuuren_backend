@@ -25,8 +25,14 @@ export class Post extends Model {
   @Column
   image: string
 
-  @Column({ field: 'compressed_image' })
-  compressedImage: string
+  @Column({ field: 'image_compressed' })
+  imageCompressed: string
+
+  @Column
+  video: string
+
+  @Column({ field: 'video_compressed' })
+  videoCompressed: string
 
   @ForeignKey(() => User)
   @Column({ field: 'user_id' })
@@ -41,6 +47,12 @@ export class Post extends Model {
   @Column
   content: string;
   
+  @Column({
+    field: 'type',
+    type: DataType.ENUM ('VIDEO', 'IMAGE')
+  })
+  type: 'VIDEO' | 'IMAGE';
+
   @HasMany(() => Reply)
   replies: Reply[];
 

@@ -1,4 +1,4 @@
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, HOME_DATA_TYPE, MESSAGE } from '@common/constants';
 import { Home } from '@common/database/models/home.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
@@ -27,15 +27,33 @@ export class AdminHomeService {
 
   async update(
     data: Partial<Home>,
-    file: Express.Multer.File
+    files: Express.Multer.File[]
   ): Promise<Home> {
     const item = await this.homeModel.findOne();
     if (!item) {
       throw new HttpException(MESSAGE.FAILED_FETCH_HOME_DATA, HttpStatus.BAD_REQUEST);
     }
 
-    if (file?.size) {
-      data.backgroundVideo = await this.uploadService.uploadFileToBucket(file, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    const backgroundImageFile: Express.Multer.File = data.type == HOME_DATA_TYPE.IMAGE ? files[0] : null;
+    const backgroundImageCompressedFile: Express.Multer.File = data.type == HOME_DATA_TYPE.IMAGE ? files[1] : null;
+
+    const backgroundVideoFile: Express.Multer.File = data.type == HOME_DATA_TYPE.VIDEO ? files[0] : null;
+    const backgroundVideoCompressedFile: Express.Multer.File = data.type == HOME_DATA_TYPE.VIDEO ? files[1] : null;
+
+    if (backgroundImageFile?.size) {
+      data.backgroundImage = await this.uploadService.uploadFileToBucket(backgroundImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+
+    if (backgroundImageCompressedFile?.size) {
+      data.backgroundImageCompressed = await this.uploadService.uploadFileToBucket(backgroundImageCompressedFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+
+    if (backgroundVideoFile?.size) {
+      data.backgroundVideo = await this.uploadService.uploadFileToBucket(backgroundVideoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+
+    if (backgroundVideoCompressedFile?.size) {
+      data.backgroundVideoCompressed = await this.uploadService.uploadFileToBucket(backgroundVideoCompressedFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
     }
 
     return await item.update(data);

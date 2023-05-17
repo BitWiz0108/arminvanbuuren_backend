@@ -24,6 +24,9 @@ import { AdminGalleryModule } from './gallery/admin.gallery.module';
 import { AdminHomeModule } from './home/admin.home.module';
 import { AdminAboutModule } from './about/admin.about.module';
 import { AdminPaymentGatewayModule } from './payment-gateway/admin.payment-gateway.module';
+import { AdminLoginBackgroundModule } from './login-background/admin.login-background.module';
+import { AdminCategoryModule } from './category/admin.category.module';
+import { AdminOAuthModule } from './oauth/admin.oauth.module';
 
 @Module({
   imports: [
@@ -47,6 +50,9 @@ import { AdminPaymentGatewayModule } from './payment-gateway/admin.payment-gatew
     AdminGalleryModule,
     AdminHomeModule,
     AdminPaymentGatewayModule,
+    AdminLoginBackgroundModule,
+    AdminCategoryModule,
+    AdminOAuthModule,
   ],
   controllers: [],
   providers: [

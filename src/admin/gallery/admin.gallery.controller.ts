@@ -1,9 +1,9 @@
-import { Controller, Param, Body, Get, Post, UseGuards, Put, Delete, Query, HttpCode, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Param, Body, Get, Post, UseGuards, Put, Delete, Query, HttpCode, HttpStatus, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AdminGalleryService } from './admin.gallery.service';
 import { AdminGuard } from '@admin/admin.guard';
 import { Gallery } from '@models/gallery.entity';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiBearerAuth()
 @ApiTags('Admin Gallery')
@@ -20,17 +20,17 @@ export class AdminGalleryController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @UseInterceptors(FileInterceptor('imageFile'))
-    async add(@Body() data: Partial<Gallery>, @UploadedFile() imageFile: Express.Multer.File) {
-      const result = await this.galleryService.add(data, imageFile);
+    @UseInterceptors(FilesInterceptor('files'))
+    async add(@Body() data: Partial<Gallery>, @UploadedFiles() files: Array<Express.Multer.File>) {
+      const result = await this.galleryService.add(data, files);
       return result;
     }
 
     @Put()
     @HttpCode(HttpStatus.ACCEPTED)
-    @UseInterceptors(FileInterceptor('imageFile'))
-    async update(@Body() data: Partial<Gallery>, @UploadedFile() imageFile: Express.Multer.File) {
-      const result = await this.galleryService.update(data, imageFile);
+    @UseInterceptors(FilesInterceptor('files'))
+    async update(@Body() data: Partial<Gallery>, @UploadedFiles() files: Array<Express.Multer.File>) {
+      const result = await this.galleryService.update(data, files);
       return result;
     }
 

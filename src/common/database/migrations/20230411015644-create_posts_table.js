@@ -11,8 +11,13 @@ module.exports = {
      */
     await queryInterface.createTable('posts', { 
       id: { type: Sequelize.BIGINT, allowNull: false, autoIncrement: true, unique: true, primaryKey: true, },
-      image: { type: Sequelize.STRING, allowNull: false },
-      compressed_image: { type: Sequelize.STRING, allowNull: false },
+      image: { type: Sequelize.STRING, },
+      image_compressed: { type: Sequelize.STRING, },
+      video: { type: Sequelize.STRING, },
+      video_compressed: { type: Sequelize.STRING, },
+      type: { 
+        type: Sequelize.ENUM('IMAGE', 'VIDEO'),
+      },
       user_id: { type: Sequelize.BIGINT, allowNull: false },
       title: { type: Sequelize.STRING, allowNull: false },
       content: { type: Sequelize.TEXT, allowNull: false },

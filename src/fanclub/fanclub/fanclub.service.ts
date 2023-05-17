@@ -4,7 +4,6 @@ import { FanclubArtistInfoDto, FanclubHighlightsDto, FavoritePostDoneDto, Favori
 import { User } from '@models/user.entity';
 import { ArtistGenre } from '@common/database/models/artist-genre.entity';
 import { Album } from '@models/album.entity';
-import { Language } from '@models/language.entity';
 import { ROLES } from '@common-modules/auth/role.enum';
 import { Music } from '@models/music.entity';
 import { LiveStream } from '@models/live-stream.entity';
@@ -69,10 +68,15 @@ export class FanclubService {
       numberOfLivestreams: artist.livestreams.length,
       description: artist.description,
       albumNames: albumNames,
+      mobile: artist.mobile,
       address: artist.address,
-      bannerImage: artist.bannerImage,
       avatarImage: artist.avatarImage,
       logoImage: artist.logoImage,
+      bannerType: artist.bannerType,
+      bannerImage: artist.bannerImage,
+      bannerImageCompressed: artist.bannerImageCompressed,
+      bannerVideo: artist.bannerVideo,
+      bannerVideoCompressed: artist.bannerVideoCompressed,
       facebook: artist.facebook,
       instagram: artist.instagram,
       youtube: artist.youtube,
@@ -106,8 +110,11 @@ export class FanclubService {
       const post : PostAllDto = {
         id: item.id,
         title: item.title,
+        type: item.type,
         image: item.image,
-        compressedImage: item.compressedImage,
+        imageCompressed: item.imageCompressed,
+        video: item.video,
+        videoCompressed: item.videoCompressed,
         content: item.content,
         createdAt: item.createdAt,
         isFavorite: someoneLikeIt ? true : false,
@@ -148,8 +155,11 @@ export class FanclubService {
       const postWithReplies : PostAllDtoWithReplies = {
         id: post.id,
         title: post.title,
+        type: post.type,
         image: post.image,
-        compressedImage: post.compressedImage,
+        imageCompressed: post.imageCompressed,
+        video: post.video,
+        videoCompressed: post.videoCompressed,
         content: post.content,
         createdAt: post.createdAt,
         author: post.author,

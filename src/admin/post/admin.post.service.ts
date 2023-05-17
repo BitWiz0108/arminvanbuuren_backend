@@ -5,7 +5,7 @@ import { PostListOption, PostPartialDto, PostPayloadDto } from './dto/post-optio
 import { AdminPostPaginatedDto } from './dto/post.dto';
 import { User } from '@models/user.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE, POST_TYPE } from '@common/constants';
 import { Reply } from '@common/database/models/reply.entity';
 import { Identifier } from 'sequelize/types/model';
 
@@ -24,19 +24,32 @@ export class AdminPostService {
   ) {
     this.bucketOption = { 
       targetBucket: BUCKET_NAME.POST,
-      bucketBase: process.env.AWS_S3_BUCKET_NAME,
-      acl: BUCKET_ACL_TYPE.PRIVATE,
+      bucketBase: process.env.AWS_S3_PUBLIC_BUCKET_NAME,
+      acl: BUCKET_ACL_TYPE.PUBLIC_READ,
     };
   }
 
-  async add(data: Partial<Post>, file: Express.Multer.File) : Promise<Post> {
-    if (file) {
-      data.image = await this.uploadService.uploadFileToBucket(file, ASSET_TYPE.IMAGE, false, this.bucketOption);
-      data.compressedImage = await this.uploadService.uploadFileToBucket(file, ASSET_TYPE.IMAGE, true, this.bucketOption);
+  async add(data: Partial<Post>, files: Express.Multer.File[]) : Promise<Post> {
+    if (data.type == POST_TYPE.IMAGE) {
+      if (files[0]?.size)
+        data.image = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.IMAGE, false, this.bucketOption);
+      if (files[1]?.size)
+        data.imageCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
+    
+    if (data.type == POST_TYPE.VIDEO) {
+      if (files[0]?.size)
+        data.video = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.VIDEO, false, this.bucketOption);
+      if (files[1]?.size)
+        data.videoCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+
     const newPost = await this.postModel.create({
+      type: data.type,
       image: data.image ? data.image : null,
-      compressedImage: data.compressedImage ? data.compressedImage : null,
+      imageCompressed: data.imageCompressed ? data.imageCompressed : null,
+      video: data.video ? data.video : null,
+      videoCompressed: data.videoCompressed ? data.videoCompressed : null,
       authorId: data.authorId,
       title: data.title,
       content: data.content,
@@ -53,16 +66,25 @@ export class AdminPostService {
 
   async update(
     data: Partial<Post>,
-    file: Express.Multer.File
+    files: Express.Multer.File[]
   ): Promise<Post> {
     const item = await this.postModel.findByPk(data.id);
     if (!item) {
-      throw new HttpException(`Post with id ${data.id} not found.`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
 
-    if (file?.size) { // if imageFile exists
-      data.image = await this.uploadService.uploadFileToBucket(file, ASSET_TYPE.IMAGE, false, this.bucketOption);
-      data.compressedImage = await this.uploadService.uploadFileToBucket(file, ASSET_TYPE.IMAGE, true, this.bucketOption);
+    if (data.type == POST_TYPE.IMAGE) {
+      if (files[0]?.size)
+        data.image = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.IMAGE, false, this.bucketOption);
+      if (files[1]?.size)
+        data.imageCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+    
+    if (data.type == POST_TYPE.VIDEO) {
+      if (files[0]?.size)
+        data.video = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.VIDEO, false, this.bucketOption);
+      if (files[1]?.size)
+        data.videoCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.VIDEO, false, this.bucketOption);
     }
 
     await item.update(data);

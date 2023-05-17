@@ -15,9 +15,28 @@ export class AdminUserController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async getAllUsers(
-    @Query('page') page: number, @Query('limit') limit: number
+    @Query('page') page: number, 
+    @Query('limit') limit: number,
+    @Query('status') statusSortOrder: string,
+    @Query('fullName') fullNameSortOrder: string,
+    @Query('email') emailSortOrder: string,
+    @Query('createdAt') createdAtSortOrder: string,
   ) {
-    return this.userService.getAllUsers({ page, limit });
+    return this.userService.getAllUsers({
+      page,
+      limit,
+      statusSortOrder,
+      fullNameSortOrder,
+      emailSortOrder,
+      createdAtSortOrder
+    });
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('avatarImageFile'))
+  async create(@Body() data: Partial<User>, @UploadedFile() avatarImageFile: Express.Multer.File) {
+    return this.userService.create(data, avatarImageFile);
   }
 
   @Put()

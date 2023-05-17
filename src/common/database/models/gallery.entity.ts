@@ -15,11 +15,23 @@ export class Gallery extends Model {
   @Column
   id: number;
 
+  @Column({
+    field: 'type',
+    type: DataType.ENUM('IMAGE', 'VIDEO'),
+  })
+  type: 'IMAGE' | 'VIDEO';
+  
   @Column
   image: string;
 
-  @Column({ field: 'compressed_image'})
-  compressedImage: string;
+  @Column({ field: 'image_compressed'})
+  imageCompressed: string;
+
+  @Column
+  video: string;
+
+  @Column({ field: 'video_compressed' })
+  videoCompressed: string;
 
   @Column
   description: string;

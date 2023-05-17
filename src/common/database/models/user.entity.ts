@@ -76,11 +76,26 @@ export class User extends Model {
   @Column({ field: 'avatar_image' })
   avatarImage: string;
 
+  @Column({ field: 'logo_image' })
+  logoImage: string;
+
+  @Column({
+    field: 'banner_type',
+    type: DataType.ENUM ('VIDEO', 'IMAGE')
+  })
+  bannerType: 'VIDEO' | 'IMAGE';
+  
   @Column({ field: 'banner_image' })
   bannerImage: string;
 
-  @Column({ field: 'logo_image' })
-  logoImage: string;
+  @Column({ field: 'banner_image_compressed' })
+  bannerImageCompressed: string;
+
+  @Column({ field: 'banner_video' })
+  bannerVideo: string;
+
+  @Column({ field: 'banner_video_compressed' })
+  bannerVideoCompressed: string;
 
   @Column
   mobile: string;

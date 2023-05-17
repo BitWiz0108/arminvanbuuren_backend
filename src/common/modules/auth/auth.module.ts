@@ -10,10 +10,11 @@ import { Role } from '@models/role.entity';
 import { PasswordReset } from '@common/database/models/password-reset.entity';
 import { SendEmailService } from '@common/services/send-email.service';
 import { EmailTemplate } from '@common/database/models/email-template.entity';
+import { OAuth } from '@common/database/models/oauth.entity';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([User, Role, PasswordReset, EmailTemplate, ]),
+    SequelizeModule.forFeature([User, Role, PasswordReset, EmailTemplate, OAuth, ]),
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,

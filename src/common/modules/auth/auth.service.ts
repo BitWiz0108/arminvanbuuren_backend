@@ -6,13 +6,15 @@ import * as fb from 'fb';
 import { User } from '@models/user.entity';
 import { Role } from '@models/role.entity';
 import { AuthInput } from './dto/auth.input';
-import { AuthInfo, SigninArgs, } from './dto/signin.args';
+import { AuthInfo, OAuthSigninArgs, SigninArgs, } from './dto/signin.args';
 import { ROLES_KEY, Roles } from './roles.decorator';
 import { ROLES } from './role.enum';
 import { Plan } from '@common/database/models/plan.entity';
 import { PasswordReset } from '@common/database/models/password-reset.entity';
 import { MESSAGE, PASSWORD_RESET_FORM } from '@common/constants';
 import * as moment from 'moment';
+import { payment } from 'paypal-rest-sdk';
+import { OAuth } from '@common/database/models/oauth.entity';
 
 @Injectable()
 export class AuthService {
@@ -23,52 +25,56 @@ export class AuthService {
     private readonly roleModel: typeof Role,
     @InjectModel(PasswordReset)
     private readonly passwordResetModel: typeof PasswordReset,
+    @InjectModel(OAuth)
+    private readonly oauthModel: typeof OAuth,
 
     private jwtService: JwtService,
   ) {}
 
-  private readonly app_id = process.env.FACEBOOK_APP_ID;
-  private readonly app_secret = process.env.FACEBOOK_APP_SECRET;
+  async oauth(signinArgs: OAuthSigninArgs): Promise<AuthInfo> {
+    const oauth = await this.oauthModel.findOne({
+      where: {
+        provider: signinArgs.provider
+      }
+    });
+    fb.options({ appId: oauth.appId, appSecret: oauth.appSecret });
+    const fields = 'id, name, email';
+    const user_info_fb = await fb.api('me', { fields, access_token: signinArgs.accessToken });
+
+    console.log('fb info', user_info_fb);
+    // Use Sequelize to query your database for the user with the Facebook ID returned by the `fb.api` method.
+    let user = await this.authModel.findOne({ where: { facebook_id: user_info_fb.id } });
+    
+    if (!user) {
+      // User not found, create a new user in your database.
+      user = await this.authModel.create({
+        facebookId: user_info_fb.id,
+        email: user_info_fb.email,
+        username: user_info_fb.name,
+      });
+      const access_token = this.jwtService.sign({ id: user.id });
+      return {
+        user: user,
+        accessToken: access_token
+      };
+    }
+  }
 
   async signin(signinArgs: SigninArgs): Promise<AuthInfo> {
-    if (signinArgs.provider) { // OAuth authentication
-      fb.options({ appId: this.app_id, appSecret: this.app_secret });
-      const fields = 'id, name, email';
-      const user_info_fb = await fb.api('me', { fields, access_token: signinArgs.access_token });
-
-      // Use Sequelize to query your database for the user with the Facebook ID returned by the `fb.api` method.
-      let user = await this.authModel.findOne({ where: { facebook_id: user_info_fb.id } });
-      
-      if (!user) {
-        // User not found, create a new user in your database.
-        user = await this.authModel.create({
-          facebookId: user_info_fb.id,
-          email: user_info_fb.email,
-          username: user_info_fb.name,
-        });
-        const access_token = this.jwtService.sign({ id: user.id });
-        return { 
-          user: user,
-          accessToken: access_token
-        };
-      }
+    const user = await this.authModel.findOne({
+      where: { username: signinArgs.username },
+      include: [
+        { model: Role, as: 'role', },
+        { model: Plan, as: 'plan', }
+      ]
+    });
+    if (user && bcrypt.compareSync(signinArgs.password, user.password)) {
+      const payload = { id: user.id };
+      const access_token = this.jwtService.sign(payload);
+      return { user: user, accessToken: access_token, };
     } else {
-      const user = await this.authModel.findOne({
-        where: { username: signinArgs.username },
-        include: [
-          { model: Role, as: 'role', },
-          { model: Plan, as: 'plan', }
-        ]
-      });
-      if (user && bcrypt.compareSync(signinArgs.password, user.password)) {
-        const payload = { id: user.id };
-        const access_token = this.jwtService.sign(payload);
-        return { user: user, accessToken: access_token, };
-      } else {
-        throw new HttpException('Invalid username or password', HttpStatus.UNAUTHORIZED);
-      }
+      throw new HttpException('Invalid username or password', HttpStatus.UNAUTHORIZED);
     }
-    return null;
   }
 
   async checkAuth(req: any): Promise<AuthInfo> {
@@ -87,7 +93,11 @@ export class AuthService {
     return auth_info;
   }
 
-  async updatePassword(id: string, oldPassword: string, newPassword: string): Promise<User> {
+  async updatePassword(payload: any): Promise<User> {
+    const id = payload.id;
+    const oldPassword = payload.oldPassword;
+    const newPassword = payload.newPassword;
+
     const user = await this.authModel.findByPk(id);
     if (user && bcrypt.compareSync(oldPassword, user.password)) {
       user.password = bcrypt.hashSync(newPassword, 10);

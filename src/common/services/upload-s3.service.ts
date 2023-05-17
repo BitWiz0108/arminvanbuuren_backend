@@ -32,7 +32,7 @@ export class UploadToS3Service {
   
   async compressImage(buffer: Buffer): Promise<Buffer> {
     const compressedImage = await sharp(buffer)
-      .resize(500) // resize the image to 500px width (you can set your own dimensions)
+      // .resize(500) // resize the image to 500px width (you can set your own dimensions)
       .jpeg({ quality: 80 }) // compress the image to 80% quality JPEG format
       .toBuffer(); // get the compressed image buffer
 
@@ -134,7 +134,7 @@ export class UploadToS3Service {
             const ffprobeOutput = Buffer.concat(chunks).toString();
             const metadata = JSON.parse(ffprobeOutput).streams[0];
 
-            const videoBitrate = metadata.bit_rate / 3;
+            const videoBitrate = metadata.bit_rate / 2;
             // const videoBitrate = 500;
             const videoCodec = metadata.codec_name;
             const width = metadata.width;
@@ -146,11 +146,12 @@ export class UploadToS3Service {
               '-i', inputFilePath,
               '-c:v', 'libx264',
               '-preset', 'slow',
-              '-crf', '28',
+              '-crf', '18',
               '-b:v', `${videoBitrate}`,
-              '-bufsize', `1000k`,
+              '-bufsize', `2000k`,
               // '-maxrate', '700k',
-              '-vf', `scale=800:450`,
+              // '-vf', `scale=800:450`,
+              '-vf', 'scale=trunc(oh*a/2)*2:720',
               '-y', outputFilePath
             ]);
             
@@ -192,23 +193,23 @@ export class UploadToS3Service {
 
       let willUploadFile: Buffer = file.buffer;
   
-      if (needCompress == true) {
-        if (type == ASSET_TYPE.IMAGE) {
-          willUploadFile = await this.compressImage(file.buffer);
-        } else if (type == ASSET_TYPE.MUSIC) {
-          try {
-            willUploadFile = await this.compressMusic(fileNameToUpload, file.buffer);
-          } catch (error) {
-            throw new HttpException(MESSAGE.FAILED_TO_COMPRESS_MUSIC, HttpStatus.BAD_REQUEST);
-          }
-        } else if (type == ASSET_TYPE.VIDEO) {
-          try {
-            willUploadFile = await this.compressVideo(fileNameToUpload, file.buffer);
-          } catch (error) {
-            throw new HttpException(MESSAGE.FAILED_TO_COMPRESS_VIDEO, HttpStatus.BAD_REQUEST);
-          }
-        }
-      }
+      // if (needCompress == true) {
+      //   if (type == ASSET_TYPE.IMAGE) {
+      //     willUploadFile = await this.compressImage(file.buffer);
+      //   } else if (type == ASSET_TYPE.MUSIC) {
+      //     try {
+      //       willUploadFile = await this.compressMusic(fileNameToUpload, file.buffer);
+      //     } catch (error) {
+      //       throw new HttpException(MESSAGE.FAILED_TO_COMPRESS_MUSIC, HttpStatus.BAD_REQUEST);
+      //     }
+      //   } else if (type == ASSET_TYPE.VIDEO) {
+      //     try {
+      //       willUploadFile = await this.compressVideo(fileNameToUpload, file.buffer);
+      //     } catch (error) {
+      //       throw new HttpException(MESSAGE.FAILED_TO_COMPRESS_VIDEO, HttpStatus.BAD_REQUEST);
+      //     }
+      //   }
+      // }
   
       const uploadFileParams = {
         Key: `${new AWSBucketNameOptimizer(bucketOption.targetBucket).getAwsOptimizedBucketPath()}/${needCompress ? compressedFileNameToUpload : fileNameToUpload}`,

@@ -36,6 +36,10 @@ export class AWSBucketNameOptimizer {
       this.awsOptimizedBucketPath = process.env.AWS_S3_HOME_PATH;
     } else if (bucketType == BUCKET_NAME.ABOUT) {
       this.awsOptimizedBucketPath = process.env.AWS_S3_ABOUT_PATH;
+    } else if (bucketType == BUCKET_NAME.LB) {
+      this.awsOptimizedBucketPath = process.env.AWS_S3_LB_PATH;
+    } else if (bucketType == BUCKET_NAME.CATEGORY) {
+      this.awsOptimizedBucketPath = process.env.AWS_S3_CATEGORY_PATH;
     }
     this.awsOptimizedBucketPath += `${yearStr}/${monthStr}`;
   }

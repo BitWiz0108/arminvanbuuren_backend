@@ -17,8 +17,15 @@ export class AdminMusicController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    async findAll(@Query('page') page: number, @Query('limit') limit: number) {
-      return this.musicService.findAll({page, limit});
+    async findAll(
+      @Query('page') page: number,
+      @Query('limit') limit: number,
+      @Query('title') title: string,
+      @Query('albumName') albumName: string,
+      @Query('releaseDate') releaseDate: string,
+      @Query('artistName') artistName: string,
+    ) {
+      return this.musicService.findAll({page, limit, title, albumName, releaseDate, artistName});
     }
 
     @Post()
@@ -39,8 +46,8 @@ export class AdminMusicController {
       @Body() data: Partial<Music>,
       @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
-      const album = await this.musicService.update(data, files);
-      return album;
+      const music = await this.musicService.update(data, files);
+      return music;
     }
 
     @Delete()

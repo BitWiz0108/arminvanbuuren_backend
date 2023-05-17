@@ -9,11 +9,13 @@ import { Language } from '@models/language.entity';
 import { AdminMusicDto } from './dto/music.dto';
 import * as sharp from 'sharp';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME } from '@common/constants';
+import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 
 @Injectable()
 export class AdminMusicService {
   private readonly bucketOption: any;
+  private readonly bucketPublicOption: any;
+
   constructor(
     @InjectModel(Music)
     private readonly musicModel: typeof Music,
@@ -25,6 +27,12 @@ export class AdminMusicService {
       bucketBase: process.env.AWS_S3_BUCKET_NAME,
       acl: BUCKET_ACL_TYPE.PRIVATE,
     };
+
+    this.bucketPublicOption = {
+      targetBucket: BUCKET_NAME.MUSIC,
+      bucketBase: process.env.AWS_S3_PUBLIC_BUCKET_NAME,
+      acl: BUCKET_ACL_TYPE.PUBLIC_READ,
+    }
   }
 
   async add(
@@ -33,12 +41,13 @@ export class AdminMusicService {
   ): Promise<Music>{
 
     const musicFile: Express.Multer.File = files[0];
-    const coverImageFile: Express.Multer.File = files[1];
+    const musicCompressedFile: Express.Multer.File = files[1];
+    const coverImageFile: Express.Multer.File = files[2];
 
-    data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
+    data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
 
     data.musicFile = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
-    data.musicFileCompressed = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, true, this.bucketOption);
+    data.musicFileCompressed = await this.uploadService.uploadFileToBucket(musicCompressedFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
     
     const newMusicItem: Music = await this.musicModel.create({
       userId: data.userId,
@@ -75,19 +84,23 @@ export class AdminMusicService {
   ): Promise<Music> {
     const item = await this.musicModel.findByPk(data.id);
     if (!item) {
-      throw new HttpException(`Music with id ${data.id} not found.`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
 
     const musicFile: Express.Multer.File = files[0];
-    const coverImageFile: Express.Multer.File = files[1];
+    const musicCompressedFile: Express.Multer.File = files[1];
+    const coverImageFile: Express.Multer.File = files[2];
 
     if (musicFile?.size) { // if musicFile exists
       data.musicFile = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
-      data.musicFileCompressed = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, true, this.bucketOption);
+    }
+
+    if (musicCompressedFile?.size) { // if musicFile exists
+      data.musicFileCompressed = await this.uploadService.uploadFileToBucket(musicCompressedFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
     }
 
     if (coverImageFile?.size) { // if imageFile exists
-      data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
+      data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
     }
 
     await item.update(data);
@@ -106,9 +119,28 @@ export class AdminMusicService {
   async findAll(op: MusicOption): Promise<AdminMusicDto> {
     const limit = Number(op.limit); // ensure limit is a number
     const page = Number(op.page);
+    let orders: any = [];
+    if (op.albumName) {
+      orders.push([{ model: Album, as: 'album' }, 'name', op.albumName]);
+    }
+    if (op.title) {
+      orders.push(['title', op.title]);
+    }
+    if (op.artistName) {
+      orders.push([{ model: User, as: 'singer' }, 'artistName', op.artistName]);
+    }
+    if (op.releaseDate) {
+      orders.push(['releaseDate', op.releaseDate]);
+    }
+
+    if (!orders.length) {
+      orders.push(['createdAt', 'DESC']);
+    }
+
     const musics: Music[] = await this.musicModel.findAll({ 
       offset: (page - 1) * limit, 
       limit: limit,
+      order: orders,
       include: [
         { model: Album, as: 'album' },
         { model: MusicGenre, as: 'musicGenre' },

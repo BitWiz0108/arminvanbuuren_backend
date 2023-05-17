@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE, POST_TYPE } from '@common/constants';
 import { Gallery } from '@common/database/models/gallery.entity';
 import { GalleryDto } from './dto/gallery.dto';
 
@@ -22,32 +22,51 @@ export class AdminGalleryService {
     };
   }
 
-  async add(data: Partial<Gallery>, imageFile: Express.Multer.File): Promise<Gallery> {
-    try {
-      data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
-      data.compressedImage = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
-      
-      return await this.galleryModel.create({
-        image: data.image,
-        compressedImage: data.compressedImage,
-        size: data.size,
-        description: data.description,
-      });
-    } catch (error) {
-      throw new HttpException(MESSAGE.FAILED_UPLOAD_GALLERY, HttpStatus.BAD_REQUEST);
+  async add(data: Partial<Gallery>, files: Express.Multer.File[]): Promise<Gallery> {
+    if (data.type == POST_TYPE.IMAGE) {
+      if (files[0]?.size)
+        data.image = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.IMAGE, false, this.bucketOption);
+      if (files[1]?.size)
+        data.imageCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
+    
+    if (data.type == POST_TYPE.VIDEO) {
+      if (files[0]?.size)
+        data.video = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.VIDEO, false, this.bucketOption);
+      if (files[1]?.size)
+        data.videoCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+
+    return await this.galleryModel.create({
+      type: data.type,
+      image: data.image ? data.image : null,
+      imageCompressed: data.imageCompressed ? data.imageCompressed : null,
+      video: data.video ? data.video : null,
+      videoCompressed: data.videoCompressed ? data.videoCompressed : null,
+      size: data.size,
+      description: data.description,
+    });
   }
 
-  async update(data: Partial<Gallery>, imageFile: Express.Multer.File): Promise<Gallery> {
+  async update(data: Partial<Gallery>, files: Express.Multer.File[]): Promise<Gallery> {
     const item = await this.galleryModel.findByPk(data.id);
 
     if (!item) {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
 
-    if (imageFile?.size) {
-      data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
-      data.compressedImage = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
+    if (data.type == POST_TYPE.IMAGE) {
+      if (files[0]?.size)
+        data.image = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.IMAGE, false, this.bucketOption);
+      if (files[1]?.size)
+        data.imageCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+    
+    if (data.type == POST_TYPE.VIDEO) {
+      if (files[0]?.size)
+        data.video = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.VIDEO, false, this.bucketOption);
+      if (files[1]?.size)
+        data.videoCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.VIDEO, false, this.bucketOption);
     }
 
     return await item.update(data);

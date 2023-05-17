@@ -8,11 +8,13 @@ import {
   BelongsToMany,
   BelongsTo,
   HasMany,
+  DataType,
 } from 'sequelize-typescript';
 import { Favorite } from './favorite.entity';
 import { User } from './user.entity';
 import { Language } from './language.entity';
 import { LiveStreamComment } from './live-stream-comment.entity';
+import { Category } from './category.entity';
 
 @Table({ tableName: 'live_streams', timestamps: false, }) // disable timestamps for this entity
 export class LiveStream extends Model {
@@ -40,6 +42,13 @@ export class LiveStream extends Model {
 
   @BelongsTo(() => User)
   creator: User;
+
+  @ForeignKey(() => Category)
+  @Column({ field: 'category_id' })
+  categoryId: number;
+
+  @BelongsTo(() => Category)
+  category: Category
 
   @Column
   duration: number;
@@ -77,6 +86,18 @@ export class LiveStream extends Model {
 
   @Column({ field: 'is_exclusive' })
   isExclusive: boolean;
+
+  @Column({
+    field: 'created_at',
+    type: DataType.DATE,
+  })
+  createdAt: Date;
+
+  @Column({
+    field: 'updated_at',
+    type: DataType.DATE,
+  })
+  updatedAt: Date;
 
   @HasMany(() => Favorite)
   favorites: Favorite[];

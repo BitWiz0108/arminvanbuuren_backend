@@ -17,8 +17,8 @@ export class AdminPlanService {
   ) {
     this.bucketOption = { 
       targetBucket: BUCKET_NAME.PLAN,
-      bucketBase: process.env.AWS_S3_BUCKET_NAME,
-      acl: BUCKET_ACL_TYPE.PRIVATE,
+      bucketBase: process.env.AWS_S3_PUBLIC_BUCKET_NAME,
+      acl: BUCKET_ACL_TYPE.PUBLIC_READ,
     };
   }
 

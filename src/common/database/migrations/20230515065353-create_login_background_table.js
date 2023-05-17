@@ -9,7 +9,7 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.createTable('home', { 
+    await queryInterface.createTable('login_background', { 
       id: { type: Sequelize.INTEGER, allowNull: false, autoIncrement: true, unique: true, primaryKey: true, },
       type: {
         type: Sequelize.ENUM('VIDEO', 'IMAGE'),
@@ -18,8 +18,6 @@ module.exports = {
       background_image_compressed: { type: Sequelize.STRING, },
       background_video: { type: Sequelize.STRING, },
       background_video_compressed: { type: Sequelize.STRING, },
-      youtube_video_url: { type: Sequelize.STRING, },
-      youtube_title: { type: Sequelize.STRING, },
     });
   },
 
@@ -30,6 +28,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.dropTable('home');
+    await queryInterface.dropTable('login_background');
   }
 };

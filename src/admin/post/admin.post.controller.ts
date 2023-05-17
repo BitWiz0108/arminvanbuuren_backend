@@ -1,9 +1,9 @@
-import { Controller, Param, Body, Get, Post, UseGuards, Put, Delete, Query, HttpCode, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Param, Body, Get, Post, UseGuards, Put, Delete, Query, HttpCode, HttpStatus, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AdminPostService } from './admin.post.service';
 import { AdminGuard } from '@admin/admin.guard';
 import { PostPartialDto, PostPayloadDto } from './dto/post-option.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiBearerAuth()
 @ApiTags('Admin Post')
@@ -22,25 +22,22 @@ export class AdminPostController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('imageFile'))
+  @UseInterceptors(FilesInterceptor('files'))
   async add(
     @Body() data: PostPayloadDto, 
-    @UploadedFile() imageFile: Express.Multer.File,
+    @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    return this.postService.add(data, imageFile);
+    return this.postService.add(data, files);
   }
 
   @Put()
   @HttpCode(HttpStatus.ACCEPTED)
-  @UseInterceptors(FileInterceptor('imageFile'))
+  @UseInterceptors(FilesInterceptor('files'))
   async update(
     @Body() data: PostPartialDto,
-    @UploadedFile() imageFile: Express.Multer.File,
+    @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    const post = await this.postService.update(
-      data,
-      imageFile,
-    );
+    const post = await this.postService.update(data, files);
     return post;
   }
 

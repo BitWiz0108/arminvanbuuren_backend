@@ -9,7 +9,11 @@ export class AdminArtistInfoDto {
   website: string;
   description: string;
   address: string;
+  bannerType: string;
   bannerImage: string;
+  bannerImageCompressed: string;
+  bannerVideo: string;
+  bannerVideoCompressed: string;
   avatarImage: string;
   logoImage: string;
   mobile: string;

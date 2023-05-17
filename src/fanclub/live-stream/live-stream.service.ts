@@ -1,13 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { LiveStream } from '@models/live-stream.entity';
-import { LiveStreamCommentOption, LiveStreamOption } from './dto/live-stream-option';
+import { CategoriesWithLiveStreams, LiveStreamCommentOption, LiveStreamOption, LiveStreamOptionForCategory } from './dto/live-stream-option';
 import { FavoriteLiveStreamDoneDto, FavoriteLiveStreamDto } from './dto/favorite.dto';
 import { Favorite } from '@models/favorite.entity';
 import { LiveStreamAllDto, LiveStreamCommentsPaginatedDto, LiveStreamWithFavorite } from './dto/live-stream.dto';
 import { User } from '@models/user.entity';
 import { LiveStreamComment } from '@common/database/models/live-stream-comment.entity';
 import { Plan } from '@common/database/models/plan.entity';
+import { Category } from '@common/database/models/category.entity';
 
 @Injectable()
 export class LiveStreamService {
@@ -20,6 +21,8 @@ export class LiveStreamService {
     private readonly commentModel: typeof LiveStreamComment,
     @InjectModel(User)
     private readonly userModel: typeof User,
+    @InjectModel(Category)
+    private readonly categoryModel: typeof Category,
   ) {}
 
   async findAll(op: LiveStreamOption, req: any): Promise<LiveStreamAllDto> {
@@ -200,5 +203,61 @@ export class LiveStreamService {
     });
 
     return newItem;
+  }
+
+  async findAllLiveStreamsWithCategories(op: LiveStreamOption): Promise<CategoriesWithLiveStreams[]> {
+    const allCategories = await this.categoryModel.findAll({ 
+      include: [
+        { model: User, as: 'creator' },
+        { model: LiveStream, as: 'livestreams',
+          include: [
+            { model: User, as: 'singer' },
+            { model: User, as: 'creator' }
+          ]
+        }
+      ]
+    });
+
+    const categoryPromises = allCategories.map(async (category) => {
+      const livestreams = category.livestreams;
+
+      let totalDuration: number = 0;
+      livestreams.map(livestream => {
+        totalDuration += livestream.duration;
+      })
+
+      const ctg = {
+        id: category.id,
+        name: category.name,
+        creator: category.creator,
+        description: category.description,
+        copyright: category.copyright,
+        size: livestreams.length,
+        hours: totalDuration / 3600,
+        livestreams
+      }
+      return ctg;
+    });
+
+    const data = await Promise.all(categoryPromises);
+
+    return data;
+  }
+
+  async findAllLivestreamsForCategory(op: LiveStreamOptionForCategory): Promise<LiveStream[]> {
+    const livestreams: LiveStream[] = await this.livestreamModel.findAll({ 
+      offset: (op.page - 1) * op.limit, 
+      limit: op.limit,
+      where: {
+        isExclusive: op.isExclusive,
+        categoryId: op.categoryId
+      },
+      include: [
+        { model: User, as: 'singer' },
+        { model: User, as: 'creator' },
+      ]
+    });
+
+    return livestreams;
   }
 }

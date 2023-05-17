@@ -11,8 +11,13 @@ module.exports = {
      */
     await queryInterface.createTable('gallery', { 
       id: { type: Sequelize.INTEGER, allowNull: false, autoIncrement: true, unique: true, primaryKey: true, },
-      image: { type: Sequelize.STRING, allowNull: false, },
-      compressed_image: { type: Sequelize.STRING, allowNull: false, },
+      type: {
+        type: Sequelize.ENUM('VIDEO', 'IMAGE'),
+      },
+      image: { type: Sequelize.STRING, },
+      image_compressed: { type: Sequelize.STRING, },
+      video: { type: Sequelize.STRING, },
+      video_compressed: { type: Sequelize.STRING, },
       size: {
         type: Sequelize.ENUM('SQUARE', 'WIDE', 'TALL', 'WIDEANDTALL'),
       },

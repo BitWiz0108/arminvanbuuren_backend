@@ -19,6 +19,7 @@ export const MESSAGE = {
   FAILED_UPLOAD_GALLERY: "Failed to Create an Gallery Image",
   FAILED_FETCH_GALLERY: "No such gallery image",
   FAILED_FETCH_HOME_DATA: "Home Data not found.",
+  FAILED_FETCH_LOGIN_BACKGROUND_DATA: "Login background data not found.",
   RECEIVED_MESSAGE: "Successfully received your message",
   SEND_EMAIL_ERROR: "Failed to send connection request",
   FAILED_REMOVE_ITEM: "Failed to remove an item",
@@ -28,6 +29,7 @@ export const MESSAGE = {
   FAILED_LOAD_ARTIST_INFO: "Failed to load artist information",
   NOT_ALLOWED_MULTIPLE_DEFAULT_LANGUAGE: "There can't be 2+ default languages",
   NEED_PAYMENT_GATEWAY_INITIALIZE: "Need to initialize payment gateway",
+  NEED_OAUTH_INITIALIZE: "Need to initialize oauth configuration",
 }
 
 export const PASSWORD_RESET_FORM = {
@@ -59,6 +61,8 @@ export const BUCKET_NAME = {
   GALLERY: "gallery",
   HOME: "home",
   ABOUT: "about",
+  LB: "loginbackground",
+  CATEGORY: "category",
 }
 
 export enum PAYMENT_METHODS {
@@ -98,4 +102,19 @@ export enum ASSET_TYPE {
 export enum BUCKET_ACL_TYPE {
   PRIVATE = "private",
   PUBLIC_READ = 'public-read',
+}
+
+export enum POST_TYPE {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+}
+
+export enum BANNER_TYPE {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+}
+
+export enum HOME_DATA_TYPE {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
 }

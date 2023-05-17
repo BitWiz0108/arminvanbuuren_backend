@@ -9,17 +9,13 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.createTable('home', { 
+    await queryInterface.createTable('oauth', { 
       id: { type: Sequelize.INTEGER, allowNull: false, autoIncrement: true, unique: true, primaryKey: true, },
-      type: {
-        type: Sequelize.ENUM('VIDEO', 'IMAGE'),
+      provider: {
+        type: Sequelize.ENUM('FACEBOOK', 'TWITTER', 'INSTAGRAM', 'AMAZON', 'GITHUB', 'LINKEDIN', 'YOUTUBE'),
       },
-      background_image: { type: Sequelize.STRING, },
-      background_image_compressed: { type: Sequelize.STRING, },
-      background_video: { type: Sequelize.STRING, },
-      background_video_compressed: { type: Sequelize.STRING, },
-      youtube_video_url: { type: Sequelize.STRING, },
-      youtube_title: { type: Sequelize.STRING, },
+      app_id: { type: Sequelize.TEXT, },
+      app_secret: { type: Sequelize.TEXT, },
     });
   },
 
@@ -30,6 +26,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.dropTable('home');
+    await queryInterface.dropTable('oauth');
   }
 };

@@ -7,7 +7,7 @@ import { MusicOption, MusicOptionForAlbum } from './dto/music-option';
 import { FavoriteMusicDto } from './dto/favorite.dto';
 
 @ApiBearerAuth()
-@ApiTags('Live Stream')
+@ApiTags('Music')
 @Controller(`${process.env.API_VERSION}/music`)
 export class MusicController {
     constructor(private readonly musicService: MusicService) {}

@@ -8,8 +8,8 @@ import {
   Sequelize,
 } from 'sequelize-typescript';
 
-@Table({ tableName: 'home', timestamps: false, })
-export class Home extends Model {
+@Table({ tableName: 'login_background', timestamps: false, })
+export class LoginBackground extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -33,9 +33,4 @@ export class Home extends Model {
   @Column({ field: 'background_video_compressed' })
   backgroundVideoCompressed: string;
 
-  @Column({ field: 'youtube_video_url' })
-  youtubeVideoUrl: string;
-
-  @Column({ field: 'youtube_title' })
-  youtubeTitle: string;
 }

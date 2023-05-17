@@ -15,6 +15,7 @@ module.exports = {
       title: { type: Sequelize.STRING, allowNull: false, },
       user_id: { type: Sequelize.BIGINT, allowNull: false }, // artist
       creator_id: { type: Sequelize.BIGINT, },
+      category_id: { type: Sequelize.INTEGER },
       release_date: { type: Sequelize.STRING, allowNull: false, },
       preview_video: { type: Sequelize.STRING, allowNull: false, },
       preview_video_compressed: { type: Sequelize.STRING, allowNull: false, },
@@ -26,6 +27,8 @@ module.exports = {
       language_id: { type: Sequelize.INTEGER, allowNull: false },
       description: { type: Sequelize.TEXT, },
       is_exclusive: { type: Sequelize.BOOLEAN, allowNull: false, },
+      created_at: { type: Sequelize.STRING, },
+      updated_at: { type: Sequelize.STRING, },
     });
   },
 

@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@common-modules/auth/role.enum';
 import { Roles } from '@common-modules/auth/roles.decorator';
 import { LiveStreamService } from './live-stream.service';
-import { LiveStreamCommentOption, LiveStreamOption } from './dto/live-stream-option';
+import { LiveStreamCommentOption, LiveStreamOption, LiveStreamOptionForCategory } from './dto/live-stream-option';
 import { FavoriteLiveStreamDto } from './dto/favorite.dto';
 import { LiveStreamComment } from '@common/database/models/live-stream-comment.entity';
 
@@ -42,5 +42,19 @@ export class LiveStreamController {
   @HttpCode(HttpStatus.CREATED)
   async addComment(@Body() data: Partial<LiveStreamComment>) {
     return this.livestreamService.addComment(data);
+  }
+
+  @Roles()
+  @Post('category/list')
+  @HttpCode(HttpStatus.OK)
+  async findAllLiveStreamsWithCategories(@Body() data: LiveStreamOption) {
+    return this.livestreamService.findAllLiveStreamsWithCategories(data);
+  }
+
+  @Roles()
+  @Post('category/live-stream/list')
+  @HttpCode(HttpStatus.OK)
+  async findAllLivestreamsForCategory(@Body() data: LiveStreamOptionForCategory) {
+    return this.livestreamService.findAllLivestreamsForCategory(data);
   }
 }

@@ -20,8 +20,14 @@ module.exports = {
       artist_name: { type: Sequelize.STRING, },
       accept_term_and_policy: { type: Sequelize.BOOLEAN },
       avatar_image: { type: Sequelize.STRING, },
-      banner_image: { type: Sequelize.STRING, },
       logo_image: { type: Sequelize.STRING, },
+      banner_type: {
+        type: Sequelize.ENUM('VIDEO', 'IMAGE'),
+      },
+      banner_image: { type: Sequelize.STRING, },
+      banner_image_compressed: { type: Sequelize.STRING, },
+      banner_video: { type: Sequelize.STRING, },
+      banner_video_compressed: { type: Sequelize.STRING, },
       mobile: { type: Sequelize.STRING, },
       gender: { 
         type: Sequelize.ENUM('FEMAIL', 'MALE'),

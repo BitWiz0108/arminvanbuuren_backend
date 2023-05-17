@@ -12,14 +12,12 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-    await queryInterface.bulkInsert('home', [
+    await queryInterface.bulkInsert('login_background', [
       {
         background_video: "",
         background_video_compressed: "",
         background_image: "",
         background_image_compressed: "",
-        youtube_video_url: "",
-        youtube_title: "",
       }
       
     ], {});
@@ -32,6 +30,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete('home', null, {});
+    await queryInterface.bulkDelete('login_background', null, {});
   }
 };

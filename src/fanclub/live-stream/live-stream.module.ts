@@ -7,9 +7,10 @@ import { User } from '@models/user.entity';
 import { Favorite } from '@models/favorite.entity';
 import { Language } from '@models/language.entity';
 import { LiveStreamComment } from '@common/database/models/live-stream-comment.entity';
+import { Category } from '@common/database/models/category.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([LiveStream, User, Favorite, Language, LiveStreamComment, ])],
+  imports: [SequelizeModule.forFeature([LiveStream, User, Favorite, Language, LiveStreamComment, Category, ])],
   providers: [ LiveStreamService ],
   controllers: [ LiveStreamController ],
 })

@@ -16,8 +16,22 @@ export class AdminLiveStreamController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    async findAll(@Query('page') page: number, @Query('limit') limit: number) {
-      return this.livestreamService.findAll({page, limit});
+    async findAll(
+      @Query('page') page: number, 
+      @Query('limit') limit: number,
+      @Query('title') title: string,
+      @Query('categoryName') categoryName: string,
+      @Query('releaseDate') releaseDate: string,
+      @Query('artistName') artistName: string,
+    ) {
+      return this.livestreamService.findAll({
+        page,
+        limit,
+        title,
+        categoryName,
+        releaseDate,
+        artistName
+      });
     }
 
     @Post()
@@ -38,8 +52,8 @@ export class AdminLiveStreamController {
       @Body() data: Partial<LiveStream>,
       @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
-      const album = await this.livestreamService.update(data, files);
-      return album;
+      const livestream = await this.livestreamService.update(data, files);
+      return livestream;
     }
 
     @Delete()

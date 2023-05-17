@@ -3,12 +3,11 @@ import { InjectModel } from '@nestjs/sequelize';
 import { User } from '@models/user.entity';
 import { AdminArtistInfoDto } from './dto/artist.dto';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { ASSET_TYPE, BANNER_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 
 @Injectable()
 export class AdminArtistService {
   private readonly bucketOption: any;
-  private readonly secondBucketOption: any;
 
   constructor(
     @InjectModel(User)
@@ -16,13 +15,7 @@ export class AdminArtistService {
 
     private uploadService: UploadToS3Service,
   ) {
-    this.bucketOption = { 
-      targetBucket: BUCKET_NAME.BANNER,
-      bucketBase: process.env.AWS_S3_BUCKET_NAME,
-      acl: BUCKET_ACL_TYPE.PRIVATE,
-    };
-
-    this.secondBucketOption = {
+    this.bucketOption = {
       targetBucket: BUCKET_NAME.LOGO,
       bucketBase: process.env.AWS_S3_PUBLIC_BUCKET_NAME,
       acl: BUCKET_ACL_TYPE.PUBLIC_READ,
@@ -35,22 +28,37 @@ export class AdminArtistService {
   ): Promise<AdminArtistInfoDto> {
     const item = await this.artistModel.findByPk(data.id);
     if (!item) {
-      throw new Error(`Artist with id ${data.id} not found.`);
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
-    const bannerImageFile: Express.Multer.File = files[0];
-    const avatarImageFile: Express.Multer.File = files[1];
-    const logoImageFile: Express.Multer.File = files[2];
+    const bannerImageFile: Express.Multer.File = data.bannerType == BANNER_TYPE.IMAGE ? files[0] : null;
+    const bannerImageCompressedFile: Express.Multer.File = data.bannerType == BANNER_TYPE.IMAGE ? files[1] : null;
+    const bannerVideoFile: Express.Multer.File = data.bannerType == BANNER_TYPE.VIDEO ? files[0] : null;
+    const bannerVideoCompressedFile: Express.Multer.File = data.bannerType == BANNER_TYPE.VIDEO ? files[1] : null;
+    const avatarImageFile: Express.Multer.File = files[2];
+    const logoImageFile: Express.Multer.File = files[3];
 
     if (bannerImageFile?.size) {
-      data.bannerImage = await this.uploadService.uploadFileToBucket(bannerImageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
+      data.bannerImage = await this.uploadService.uploadFileToBucket(bannerImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+
+    if (bannerImageCompressedFile?.size) {
+      data.bannerImageCompressed = await this.uploadService.uploadFileToBucket(bannerImageCompressedFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+
+    if (bannerVideoFile?.size) {
+      data.bannerVideo = await this.uploadService.uploadFileToBucket(bannerVideoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+
+    if (bannerVideoCompressedFile?.size) {
+      data.bannerVideoCompressed = await this.uploadService.uploadFileToBucket(bannerVideoCompressedFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
     }
 
     if (avatarImageFile?.size) {
-      data.avatarImage = await this.uploadService.uploadFileToBucket(avatarImageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
+      data.avatarImage = await this.uploadService.uploadFileToBucket(avatarImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
 
     if (logoImageFile?.size) {
-      data.logoImage = await this.uploadService.uploadFileToBucket(logoImageFile, ASSET_TYPE.IMAGE, false, this.secondBucketOption);
+      data.logoImage = await this.uploadService.uploadFileToBucket(logoImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
     await item.update(data);
     const updatedItem : AdminArtistInfoDto = await this.artistModel.findByPk(data.id);
@@ -74,7 +82,11 @@ export class AdminArtistService {
         website: artist.website,
         description: artist.description,
         address: artist.address,
+        bannerType: artist.bannerType,
         bannerImage: artist.bannerImage,
+        bannerImageCompressed: artist.bannerImageCompressed,
+        bannerVideo: artist.bannerVideo,
+        bannerVideoCompressed: artist.bannerVideoCompressed,
         avatarImage: artist.avatarImage,
         logoImage: artist.logoImage,
         mobile: artist.mobile,

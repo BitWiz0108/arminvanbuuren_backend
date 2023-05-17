@@ -33,22 +33,17 @@ export class AdminAboutService {
       throw new HttpException(MESSAGE.FAILED_TO_FETCH_TOS_DATA, HttpStatus.BAD_REQUEST);
     }
 
-    let data: Partial<CoverImage> = {
-      coverImage1: '',
-      coverImage2: '',
-    };
-
     const coverImageFile1: Express.Multer.File = files[0];
     const coverImageFile2: Express.Multer.File = files[1];
 
     if (coverImageFile1?.size) {
-      data.coverImage1 = await this.uploadService.uploadFileToBucket(coverImageFile1, ASSET_TYPE.IMAGE, false, this.bucketOption);
+      item.coverImage1 = await this.uploadService.uploadFileToBucket(coverImageFile1, ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
 
     if (coverImageFile2?.size) {
-      data.coverImage2 = await this.uploadService.uploadFileToBucket(coverImageFile2, ASSET_TYPE.IMAGE, false, this.bucketOption);
+      item.coverImage2 = await this.uploadService.uploadFileToBucket(coverImageFile2, ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
 
-    return await item.update(data);
+    return await item.save();
   }
 }

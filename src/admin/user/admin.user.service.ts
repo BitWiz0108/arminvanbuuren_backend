@@ -8,7 +8,9 @@ import { Plan } from '@common/database/models/plan.entity';
 import { AdminUsersPaginatedDto } from './dto/user.dto';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME } from '@common/constants';
-
+import * as moment from 'moment';
+import * as bcrypt from 'bcrypt';
+import { ROLES } from '@common-modules/auth/role.enum';
 
 @Injectable()
 export class AdminUserService {
@@ -22,17 +24,41 @@ export class AdminUserService {
   ) {
     this.bucketOption = { 
       targetBucket: BUCKET_NAME.AVATAR,
-      bucketBase: process.env.AWS_S3_BUCKET_NAME,
-      acl: BUCKET_ACL_TYPE.PRIVATE,
+      bucketBase: process.env.AWS_S3_PUBLIC_BUCKET_NAME,
+      acl: BUCKET_ACL_TYPE.PUBLIC_READ,
     };
   }
 
   async getAllUsers(op: UserViewOption): Promise<AdminUsersPaginatedDto> {
     const limit = Number(op.limit); // ensure limit is a number
     const page = Number(op.page);
-    const users: User[] = await this.userModel.findAll({ 
-      offset: (page - 1) * limit, 
+    let orders: any = [];
+
+    if (op.statusSortOrder) {
+      orders.push(['status', op.statusSortOrder]);
+    }
+
+    if (op.fullNameSortOrder) {
+      orders.push(['firstName', op.fullNameSortOrder]);
+      orders.push(['lastName', op.fullNameSortOrder]);
+    }
+
+    if (op.emailSortOrder) {
+      orders.push(['email', op.emailSortOrder]);
+    }
+
+    if (op.createdAtSortOrder) {
+      orders.push(['createdAt', op.createdAtSortOrder]);
+    }
+
+    if (!orders.length) {
+      orders.push(['createdAt', 'DESC']);
+    }
+
+    const users: User[] = await this.userModel.findAll({
+      offset: (page - 1) * limit,
       limit: limit,
+      order: orders,
       include: [
         { model: Role, as: 'role', },
         { model: Plan, as: 'plan', },
@@ -49,6 +75,38 @@ export class AdminUserService {
     return data;
   }
 
+  async create(data: Partial<User>, avatarImageFile: Express.Multer.File): Promise<User> {
+    if (avatarImageFile?.size) {
+      data.avatarImage = await this.uploadService.uploadFileToBucket(avatarImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+
+    const newItem = await this.userModel.create({
+      username: data.username,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      avatarImage: data.avatarImage,
+      gender: data.gender,
+      dob: data.dob,
+      emailVerifiedAt: moment().format("YYYY-MM-DD HH:mm:ss"),
+      password: bcrypt.hashSync(data.password, 10),
+      roleId: ROLES.FAN,
+      status: 1,
+      address: data.address,
+      country: data.country,
+      state: data.state,
+      city: data.city,
+      zipcode: data.zipcode,
+    });
+    
+    const newUser = await this.userModel.findByPk(newItem.id, {
+      include: [
+        { model: Role, as: 'role' }
+      ]
+    });
+    return newUser;
+  }
+
   async update(data: Partial<User>, avatarImageFile: Express.Multer.File): Promise<User> {
     const profile = await this.userModel.findByPk(data.id);
     if (!profile) {
@@ -56,7 +114,7 @@ export class AdminUserService {
     }
 
     if (avatarImageFile) {
-      data.avatarImage = await this.uploadService.uploadFileToBucket(avatarImageFile, ASSET_TYPE.IMAGE, true, this.bucketOption);
+      data.avatarImage = await this.uploadService.uploadFileToBucket(avatarImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
     
     await profile.update(data);
