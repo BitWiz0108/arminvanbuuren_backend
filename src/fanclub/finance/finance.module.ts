@@ -9,9 +9,10 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '@common/database/models/user.entity';
 import { SendEmailService } from '@common/services/send-email.service';
 import { EmailTemplate } from '@common/database/models/email-template.entity';
+import { PaymentGateway } from '@common/database/models/payment-gateway.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([ Transaction, Plan, Currency, User, EmailTemplate, ])],
+  imports: [SequelizeModule.forFeature([ Transaction, Plan, Currency, User, EmailTemplate, PaymentGateway, ])],
   providers: [ FinanceService, ConfigService, SendEmailService ],
   controllers: [ FinanceController ],
 })

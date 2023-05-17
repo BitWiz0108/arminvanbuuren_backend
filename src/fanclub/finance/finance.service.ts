@@ -8,11 +8,12 @@ import { Plan } from '@common/database/models/plan.entity';
 import { Currency } from '@common/database/models/currency.entity';
 import { User } from '@common/database/models/user.entity';
 import * as moment from 'moment';
+import { PaymentGateway } from '@common/database/models/payment-gateway.entity';
 
 @Injectable()
 export class FinanceService {
-  private readonly stripe: Stripe;
-  private readonly paypal: any;
+  private stripe: Stripe;
+  private paypal: any;
   
   constructor(
     @InjectModel(Transaction)
@@ -26,25 +27,22 @@ export class FinanceService {
 
     @InjectModel(User)
     private readonly userModel: typeof User,
-  ) {
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+
+    @InjectModel(PaymentGateway)
+    private readonly pgModel: typeof PaymentGateway,
+  ) {}
+
+  async handleStripePayment(orderId: string): Promise<string> {
+    const pg = await this.pgModel.findOne();
+
+    this.stripe = new Stripe(pg.stripeSecretKey, {
       apiVersion: '2022-11-15', // set your desired API version here
       appInfo: {
         name: 'YourAppName',
         version: '1.0.0',
       },
     });
-    const paypalClient = new paypal.core.PayPalHttpClient(
-      // process.env.IS_PRODUCTION == '1' ? 
-      new paypal.core.LiveEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
-      // :
-      // new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
-    );
-    
-    this.paypal = paypalClient;
-  }
 
-  async handleStripePayment(orderId: string): Promise<string> {
     const paymentIntent = await this.stripe.paymentIntents.retrieve(orderId);
 
     if (paymentIntent.status === 'succeeded') {
@@ -57,6 +55,14 @@ export class FinanceService {
   }
 
   async handlePayPalPayment(orderId: string): Promise<string> {
+    const pg = await this.pgModel.findOne();
+
+    const paypalClient = new paypal.core.PayPalHttpClient(
+      new paypal.core.LiveEnvironment(pg.paypalClientId, pg.paypalClientSecret)
+    );
+    
+    this.paypal = paypalClient;
+
     const request = new paypal.orders.OrdersGetRequest(orderId);
     try {
       const response = await this.paypal.execute(request);
