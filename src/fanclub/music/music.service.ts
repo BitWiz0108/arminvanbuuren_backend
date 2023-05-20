@@ -21,7 +21,7 @@ export class MusicService {
 
   async findAllMusics(op: MusicOption): Promise<MusicAllDto> {
     let options: any = {
-      order: [['createdAt', 'DESC']],
+      order: [['releaseDate', 'DESC']],
     };
 
     if (op.isExclusive != null) {

@@ -40,7 +40,7 @@ export class AdminLiveStreamService {
   async add(
     data: Partial<LiveStream>,
     files: Express.Multer.File[],
-  ): Promise<LiveStream>{
+  ): Promise<LiveStream> {
 
     const coverImageFile: Express.Multer.File = files[0];
     const previewVideoFile: Express.Multer.File = files[1];
@@ -50,11 +50,19 @@ export class AdminLiveStreamService {
 
     data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
     
-    data.previewVideo = await this.uploadService.uploadFileToBucket(previewVideoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
-    data.previewVideoCompressed = await this.uploadService.uploadFileToBucket(previewVideoFileCompressed, ASSET_TYPE.VIDEO, false, this.bucketOption);
-
-    data.fullVideo = await this.uploadService.uploadFileToBucket(fullVideoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
-    data.fullVideoCompressed = await this.uploadService.uploadFileToBucket(fullVideoFileCompressed, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    if (previewVideoFile?.size) {
+      data.previewVideo = await this.uploadService.uploadFileToBucket(previewVideoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+    if (previewVideoFileCompressed?.size) {
+      data.previewVideoCompressed = await this.uploadService.uploadFileToBucket(previewVideoFileCompressed, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+    
+    if (fullVideoFile?.size) {
+      data.fullVideo = await this.uploadService.uploadFileToBucket(fullVideoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+    if (fullVideoFileCompressed?.size) {
+      data.fullVideoCompressed = await this.uploadService.uploadFileToBucket(fullVideoFileCompressed, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
 
     const newLiveStream:LiveStream = await this.livestreamModel.create({
       coverImage: data.coverImage,
@@ -179,7 +187,6 @@ export class AdminLiveStreamService {
       pages,
       livestreams,
     };
-    
     return new Promise((resolve, reject) => {
       resolve(data);
     });
