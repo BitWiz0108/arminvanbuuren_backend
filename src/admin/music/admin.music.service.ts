@@ -134,7 +134,7 @@ export class AdminMusicService {
     }
 
     if (!orders.length) {
-      orders.push(['createdAt', 'DESC']);
+      orders.push(['releaseDate', 'DESC']);
     }
 
     const musics: Music[] = await this.musicModel.findAll({ 

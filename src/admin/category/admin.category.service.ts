@@ -32,6 +32,7 @@ export class AdminCategoryService {
         userId: data.userId,
         description: data.description,
         copyright: data.copyright,
+        releaseDate: data.releaseDate,
       });
 
       const newItem = await this.categoryModel.findByPk(newCategoryItem.id, {
@@ -70,6 +71,7 @@ export class AdminCategoryService {
 
   async findAll(): Promise<Category[]> {
     return this.categoryModel.findAll({
+      order: [['releaseDate', 'DESC']],
       include: [{ model: User, as: 'creator' }],
     });
   }

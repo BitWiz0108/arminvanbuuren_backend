@@ -40,6 +40,9 @@ export class Category extends Model {
   @Column
   copyright: string;
   
+  @Column({ field: 'release_date' })
+  releaseDate: string;
+  
   @Column({ field: 'is_featured' })
   isFeatured: boolean;
 

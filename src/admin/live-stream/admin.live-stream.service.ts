@@ -165,7 +165,7 @@ export class AdminLiveStreamService {
     }
 
     if (!orders.length) {
-      orders.push(['createdAt', 'DESC']);
+      orders.push(['releaseDate', 'DESC']);
     }
 
     const livestreams: LiveStream[] = await this.livestreamModel.findAll({ 

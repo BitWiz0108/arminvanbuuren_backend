@@ -32,6 +32,7 @@ export class AdminAlbumService {
         userId: data.userId,
         description: data.description,
         copyright: data.copyright,
+        releaseDate: data.releaseDate,
       });
 
       const newItem = await this.albumModel.findByPk(newAlbumItem.id, {
@@ -70,6 +71,7 @@ export class AdminAlbumService {
 
   async findAll(): Promise<Album[]> {
     return this.albumModel.findAll({
+      order: [['releaseDate', 'DESC']],
       include: [{ model: User, as: 'creator' }],
     });
   }

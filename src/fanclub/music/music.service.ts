@@ -74,7 +74,8 @@ export class MusicService {
   }
 
   async findAllMusicsWithAlbums(op: MusicOption): Promise<AlbumsWithMusics[]> {
-    const allAlbums = await this.albumModel.findAll({ 
+    const allAlbums = await this.albumModel.findAll({
+      order: [['releaseDate', 'DESC']],
       include: [
         { model: User, as: 'creator' },
         { model: Music, as: 'musics',
@@ -86,7 +87,13 @@ export class MusicService {
     });
 
     const albumPromises = allAlbums.map(async (album) => {
-      const musicsForEachAlbum = album.musics;
+      const musicsForEachAlbum = await this.musicModel.findAll({
+        where: { albumId: album.id },
+        order: [['releaseDate', 'DESC']],
+        include: [
+          { model: User, as: 'singer' }
+        ]
+      });
 
       const promises = musicsForEachAlbum.map(async (item) => {
         const someoneLikeIt = await this.favoriteMusicModel.findOne({
@@ -141,6 +148,7 @@ export class MusicService {
     const items = await this.musicModel.findAll({ 
       offset: (op.page - 1) * op.limit, 
       limit: op.limit,
+      order: [['releaseDate', 'DESC']],
       where: {
         isExclusive: op.isExclusive,
         albumId: op.albumId

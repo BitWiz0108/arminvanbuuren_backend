@@ -206,7 +206,8 @@ export class LiveStreamService {
   }
 
   async findAllLiveStreamsWithCategories(op: LiveStreamOption): Promise<CategoriesWithLiveStreams[]> {
-    const allCategories = await this.categoryModel.findAll({ 
+    const allCategories = await this.categoryModel.findAll({
+      order: [['releaseDate', 'DESC']],
       include: [
         { model: User, as: 'creator' },
         { model: LiveStream, as: 'livestreams',
@@ -219,7 +220,14 @@ export class LiveStreamService {
     });
 
     const categoryPromises = allCategories.map(async (category) => {
-      const livestreams = category.livestreams;
+      const livestreams = await this.livestreamModel.findAll({
+        where: { categoryId: category.id },
+        order: [['releaseDate', 'DESC']],
+        include: [
+          { model: User, as: 'singer' },
+          { model: User, as: 'creator' }
+        ]
+      });
 
       let totalDuration: number = 0;
       livestreams.map(livestream => {
@@ -245,9 +253,10 @@ export class LiveStreamService {
   }
 
   async findAllLivestreamsForCategory(op: LiveStreamOptionForCategory): Promise<LiveStream[]> {
-    const livestreams: LiveStream[] = await this.livestreamModel.findAll({ 
+    const livestreams: LiveStream[] = await this.livestreamModel.findAll({
       offset: (op.page - 1) * op.limit, 
       limit: op.limit,
+      order: [['releaseDate', 'DESC']],
       where: {
         isExclusive: op.isExclusive,
         categoryId: op.categoryId

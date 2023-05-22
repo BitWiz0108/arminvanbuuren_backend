@@ -52,9 +52,6 @@ export class LiveStream extends Model {
 
   @Column
   duration: number;
-
-  @Column({ field: 'release_date' })
-  releaseDate: string;
   
   @Column({ field: 'preview_video' })
   previewVideo: string;
@@ -86,6 +83,12 @@ export class LiveStream extends Model {
 
   @Column({ field: 'is_exclusive' })
   isExclusive: boolean;
+
+  @Column({
+    field: 'release_date',
+    type: DataType.DATE,
+  })
+  releaseDate: Date;
 
   @Column({
     field: 'created_at',

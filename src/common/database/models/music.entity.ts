@@ -93,10 +93,13 @@ export class Music extends Model {
 
   @Column
   description: string;
-
-  @Column({ field: 'release_date' })
-  releaseDate: string;
   
+  @Column({
+    field: 'release_date',
+    type: DataType.DATE,
+  })
+  releaseDate: Date;
+
   @Column({
     field: 'created_at',
     type: DataType.DATE,
