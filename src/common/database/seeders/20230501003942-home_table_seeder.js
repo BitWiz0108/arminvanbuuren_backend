@@ -20,6 +20,7 @@ module.exports = {
         background_image_compressed: "",
         youtube_video_url: "",
         youtube_title: "",
+        signin_description: "",
       }
       
     ], {});

@@ -46,6 +46,7 @@ export class FanclubService {
         { model: ArtistGenre, as: 'genre' },
         { model: Album, as: 'albums' },
         { model: Music, as: 'musics' },
+        { model: Post, as: 'posts' },
         { model: LiveStream, as: 'livestreams' },
       ]
     });
@@ -64,6 +65,7 @@ export class FanclubService {
       email: artist.email,
       website: artist.website,
       numberOfFans: numberOfFans,
+      numberOfPosts: artist.posts.length,
       numberOfMusics: artist.musics.length,
       numberOfLivestreams: artist.livestreams.length,
       description: artist.description,

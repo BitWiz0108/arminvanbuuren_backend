@@ -33,4 +33,6 @@ export class LoginBackground extends Model {
   @Column({ field: 'background_video_compressed' })
   backgroundVideoCompressed: string;
 
+  @Column({ field: 'signin_description' })
+  signInDescription: string;
 }

@@ -12,6 +12,7 @@ export class FanclubArtistInfoDto {
     email: string;
     website: string;
     numberOfFans: number;
+    numberOfPosts: number;
     numberOfMusics: number;
     numberOfLivestreams: number;
     description: string;

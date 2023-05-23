@@ -18,6 +18,7 @@ import { Role } from './role.entity';
 import { Album } from './album.entity';
 import { ArtistGenre } from './artist-genre.entity';
 import { Plan } from './plan.entity';
+import { Post } from './post.entity';
 
 @Table({ tableName: 'users' })
 export class User extends Model {
@@ -201,4 +202,7 @@ export class User extends Model {
 
   @HasMany(() => Album)
   albums: Album[]
+
+  @HasMany(() => Post)
+  posts: Post[]
 }

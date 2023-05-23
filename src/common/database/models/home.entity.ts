@@ -38,4 +38,10 @@ export class Home extends Model {
 
   @Column({ field: 'youtube_title' })
   youtubeTitle: string;
+
+  @Column({ field: 'signin_description' })
+  signInDescription: string;
+
+  @Column({ field: 'homepage_description' })
+  homePageDescription: string;
 }

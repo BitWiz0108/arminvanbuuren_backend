@@ -18,6 +18,7 @@ module.exports = {
         background_video_compressed: "",
         background_image: "",
         background_image_compressed: "",
+        signin_description: "",
       }
       
     ], {});
