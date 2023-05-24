@@ -174,6 +174,21 @@ export class User extends Model {
   @Column({ field: 'remember_token' })
   rememberToken: string;
 
+  @Column({ field: 'site_name' })
+  siteName: string;
+
+  @Column({ field: 'site_url' })
+  siteUrl: string;
+
+  @Column({ field: 'site_title' })
+  siteTitle: string;
+
+  @Column({ field: 'site_description' })
+  siteDescription: string;
+
+  @Column({ field: 'site_social_preview_image' })
+  siteSocialPreviewImage: string;
+
   @Column({
     field: 'created_at',
     type: DataType.DATE,

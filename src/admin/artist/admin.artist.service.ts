@@ -36,6 +36,7 @@ export class AdminArtistService {
     const bannerVideoCompressedFile: Express.Multer.File = data.bannerType == BANNER_TYPE.VIDEO ? files[1] : null;
     const avatarImageFile: Express.Multer.File = files[2];
     const logoImageFile: Express.Multer.File = files[3];
+    const siteSocialPreviewImageFile: Express.Multer.File = files[4];
 
     if (bannerImageFile?.size) {
       data.bannerImage = await this.uploadService.uploadFileToBucket(bannerImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
@@ -60,6 +61,11 @@ export class AdminArtistService {
     if (logoImageFile?.size) {
       data.logoImage = await this.uploadService.uploadFileToBucket(logoImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
+
+    if (siteSocialPreviewImageFile?.size) {
+      data.siteSocialPreviewImage = await this.uploadService.uploadFileToBucket(siteSocialPreviewImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+
     await item.update(data);
     const updatedItem : AdminArtistInfoDto = await this.artistModel.findByPk(data.id);
 
@@ -98,6 +104,11 @@ export class AdminArtistService {
         youtube: artist.youtube,
         twitter: artist.twitter,
         soundcloud: artist.soundcloud,
+        siteName: artist.siteName,
+        siteUrl: artist.siteUrl,
+        siteTitle: artist.siteTitle,
+        siteDescription: artist.siteDescription,
+        siteSocialPreviewImage: artist.siteSocialPreviewImage,
       }
   
       return new Promise((resolve, reject) => {

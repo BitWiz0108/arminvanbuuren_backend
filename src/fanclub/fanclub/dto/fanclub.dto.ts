@@ -31,6 +31,11 @@ export class FanclubArtistInfoDto {
     youtube: string;
     twitter: string;
     soundcloud: string;
+    siteName: string;
+    siteUrl: string;
+    siteTitle: string;
+    siteDescription: string;
+    siteSocialPreviewImage: string;
 }
 
 export class FanclubHighlightsDto {

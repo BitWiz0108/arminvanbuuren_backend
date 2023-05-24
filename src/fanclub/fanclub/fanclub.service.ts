@@ -84,6 +84,11 @@ export class FanclubService {
       youtube: artist.youtube,
       twitter: artist.twitter,
       soundcloud: artist.soundcloud,
+      siteName: artist.siteName,
+      siteUrl: artist.siteUrl,
+      siteTitle: artist.siteTitle,
+      siteDescription: artist.siteDescription,
+      siteSocialPreviewImage: artist.siteSocialPreviewImage,
     }
 
     return data;
