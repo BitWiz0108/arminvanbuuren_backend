@@ -43,13 +43,31 @@ export class FanclubService {
 
     const artist = await this.userModel.findByPk(1, {
       include: [
-        { model: ArtistGenre, as: 'genre' },
+        // { model: ArtistGenre, as: 'genre' },
         { model: Album, as: 'albums' },
-        { model: Music, as: 'musics' },
-        { model: Post, as: 'posts' },
-        { model: LiveStream, as: 'livestreams' },
+        // { model: Music, as: 'musics' },
+        // { model: Post, as: 'posts' },
+        // { model: LiveStream, as: 'livestreams' },
       ]
     });
+
+    const numberOfPosts = await this.postModel.count({
+      where: {
+        authorId: artist.id
+      }
+    });
+
+    const numberOfMusics = await this.musicModel.count({
+      where: {
+        userId: artist.id,
+      }
+    });
+
+    const numberOfLivestreams = await this.livestreamModel.count({
+      where: {
+        singerId: artist.id,
+      }
+    })
 
     let albumNames : string[] = [];
     artist.albums.forEach(album => {
@@ -65,9 +83,12 @@ export class FanclubService {
       email: artist.email,
       website: artist.website,
       numberOfFans: numberOfFans,
-      numberOfPosts: artist.posts.length,
-      numberOfMusics: artist.musics.length,
-      numberOfLivestreams: artist.livestreams.length,
+      // numberOfPosts: artist.posts.length,
+      // numberOfMusics: artist.musics.length,
+      // numberOfLivestreams: artist.livestreams.length,
+      numberOfPosts: numberOfPosts,
+      numberOfMusics: numberOfMusics,
+      numberOfLivestreams: numberOfLivestreams,
       description: artist.description,
       albumNames: albumNames,
       mobile: artist.mobile,
