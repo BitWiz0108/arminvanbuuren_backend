@@ -34,14 +34,25 @@ export class AdminDashboardService {
   ) {}
 
   async getStatistics(): Promise<DashboardDto> {
-    const totalUsers = await this.userModel.findAll({
+    const numberOfUsers = await this.userModel.count({
       where: {
         status: true,
       }
     });
-    const numberOfUsers = totalUsers.length;
 
-    const subscribedUsers = await this.userModel.findAll({
+    // const subscribedUsers = await this.userModel.findAll({
+    //   where: {
+    //     status: true,
+    //     planId: {
+    //       [Op.not]: null,
+    //     },
+    //     planEndDate: {
+    //       [Op.gt]: new Date(),
+    //     },
+    //   }
+    // });
+
+    const numberOfSubscribedUsers = await this.userModel.count({
       where: {
         status: true,
         planId: {
@@ -53,19 +64,13 @@ export class AdminDashboardService {
       }
     });
 
-    const numberOfSubscribedUsers = subscribedUsers.length;
+    const numberOfSongs = await this.musicModel.count();
 
-    const totalMusics = await this.musicModel.findAll();
-    const numberOfSongs = totalMusics.length;
+    const numberOfLivestreams = await this.livestreamModel.count();
 
-    const totalLiveStreams = await this.livestreamModel.findAll();
-    const numberOfLivestreams = totalLiveStreams.length;
+    const numberOfAlbums = await this.albumModel.count();
 
-    const totalAlbums = await this.albumModel.findAll();
-    const numberOfAlbums = totalAlbums.length;
-
-    const totalPlans = await this.planModel.findAll();
-    const numberOfPlans = totalPlans.length;
+    const numberOfPlans = await this.planModel.count();
 
     const totalTransactions = await this.transactionModel.findAll({
       where: {

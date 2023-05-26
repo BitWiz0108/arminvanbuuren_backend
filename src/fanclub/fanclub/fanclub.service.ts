@@ -35,12 +35,6 @@ export class FanclubService {
   ) {}
 
   async getArtistInfo(): Promise<FanclubArtistInfoDto> {
-    const numberOfFans = (await this.userModel.findAll({
-      where: {
-        role_id: ROLES.FAN
-      }
-    })).length;
-
     const artist = await this.userModel.findByPk(1, {
       include: [
         // { model: ArtistGenre, as: 'genre' },
@@ -51,6 +45,12 @@ export class FanclubService {
       ]
     });
 
+    const numberOfFans = await this.userModel.count({
+      where: {
+        role_id: ROLES.FAN
+      }
+    });
+    
     const numberOfPosts = await this.postModel.count({
       where: {
         authorId: artist.id
@@ -83,9 +83,6 @@ export class FanclubService {
       email: artist.email,
       website: artist.website,
       numberOfFans: numberOfFans,
-      // numberOfPosts: artist.posts.length,
-      // numberOfMusics: artist.musics.length,
-      // numberOfLivestreams: artist.livestreams.length,
       numberOfPosts: numberOfPosts,
       numberOfMusics: numberOfMusics,
       numberOfLivestreams: numberOfLivestreams,
