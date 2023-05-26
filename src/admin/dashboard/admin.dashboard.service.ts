@@ -40,18 +40,6 @@ export class AdminDashboardService {
       }
     });
 
-    // const subscribedUsers = await this.userModel.findAll({
-    //   where: {
-    //     status: true,
-    //     planId: {
-    //       [Op.not]: null,
-    //     },
-    //     planEndDate: {
-    //       [Op.gt]: new Date(),
-    //     },
-    //   }
-    // });
-
     const numberOfSubscribedUsers = await this.userModel.count({
       where: {
         status: true,
