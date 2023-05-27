@@ -22,7 +22,7 @@ export class LiveStreamWithFavorite {
   duration: number;
   shortDescription: string;
   description: string;
-  releaseDate: Date;
+  releaseDate: string;
   isExclusive: boolean;
   isFavorite: boolean;
 }
