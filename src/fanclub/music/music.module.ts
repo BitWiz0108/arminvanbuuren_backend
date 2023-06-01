@@ -8,9 +8,10 @@ import { Favorite } from '@models/favorite.entity';
 import { Language } from '@models/language.entity';
 import { Album } from '@models/album.entity';
 import { MusicGenre } from '@common/database/models/music-genre.entity';
+import { AlbumMusic } from '@common/database/models/album-music.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Music, User, Favorite, Language, Album, MusicGenre, ])],
+  imports: [SequelizeModule.forFeature([Music, User, Favorite, Language, Album, MusicGenre, AlbumMusic, ])],
   providers: [ MusicService ],
   controllers: [ MusicController ],
 })

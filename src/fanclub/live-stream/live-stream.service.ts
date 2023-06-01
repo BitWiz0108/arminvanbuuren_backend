@@ -9,6 +9,7 @@ import { User } from '@models/user.entity';
 import { LiveStreamComment } from '@common/database/models/live-stream-comment.entity';
 import { Plan } from '@common/database/models/plan.entity';
 import { Category } from '@common/database/models/category.entity';
+import { CategoryLivestream } from '@common/database/models/category-livestream.entity';
 
 @Injectable()
 export class LiveStreamService {
@@ -23,6 +24,9 @@ export class LiveStreamService {
     private readonly userModel: typeof User,
     @InjectModel(Category)
     private readonly categoryModel: typeof Category,
+    @InjectModel(CategoryLivestream)
+    private readonly categoryLivestreamModel: typeof CategoryLivestream,
+
   ) {}
 
   async findAll(op: LiveStreamOption, req: any): Promise<LiveStreamAllDto> {
@@ -223,6 +227,12 @@ export class LiveStreamService {
         else return 0;
       });
 
+      const size = await this.categoryLivestreamModel.count({
+        where: {
+          categoryId: category.id,
+        }
+      });
+
       let totalDuration: number = 0;
       category.livestreams.map(livestream => {
         totalDuration += livestream.duration;
@@ -237,7 +247,7 @@ export class LiveStreamService {
         creator: category.creator,
         description: category.description,
         copyright: category.copyright,
-        size: livestreams.length,
+        size: size,
         hours: totalDuration / 3600,
         livestreams
       }

@@ -7,6 +7,7 @@ import { FavoriteMusicDoneDto, FavoriteMusicDto } from './dto/favorite.dto';
 import { AlbumsWithMusics, MusicAllDto, MusicWithFavorite } from './dto/music.dto';
 import { User } from '@models/user.entity';
 import { Album } from '@models/album.entity';
+import { AlbumMusic } from '@common/database/models/album-music.entity';
 
 @Injectable()
 export class MusicService {
@@ -17,6 +18,9 @@ export class MusicService {
     private readonly favoriteMusicModel: typeof Favorite,
     @InjectModel(Album)
     private readonly albumModel: typeof Album,
+    @InjectModel(AlbumMusic)
+    private readonly albumMusicModel: typeof AlbumMusic,
+    
   ) {}
 
   async findAllMusics(op: MusicOption): Promise<MusicAllDto> {
@@ -92,6 +96,12 @@ export class MusicService {
         else return 0;
       });
   
+      const size = await this.albumMusicModel.count({
+        where: {
+          albumId: album.id,
+        }
+      });
+
       const musicsForEachAlbum = album.musics.slice((op.page - 1) * op.limit, op.page * op.limit);
       
       let totalDuration: number = 0;
@@ -130,7 +140,7 @@ export class MusicService {
         creator: album.creator,
         description: album.description,
         copyright: album.copyright,
-        size: musics.length,
+        size: size,
         hours: totalDuration / 3600,
         musics
       }
