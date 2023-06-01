@@ -26,6 +26,7 @@ export const MESSAGE = {
   FAILED_CREATE_ITEM: "Failed to create an item",
   FAILED_UPDATE_ITEM: "Failed to update an item",
   FAILED_LOAD_ITEM: "Failed to load an item",
+  FAILED_ACCESS_ITEM: "You don't have permission to access",
   FAILED_LOAD_ARTIST_INFO: "Failed to load artist information",
   NOT_ALLOWED_MULTIPLE_DEFAULT_LANGUAGE: "There can't be 2+ default languages",
   NEED_PAYMENT_GATEWAY_INITIALIZE: "Need to initialize payment gateway",
@@ -104,7 +105,7 @@ export enum BUCKET_ACL_TYPE {
   PUBLIC_READ = 'public-read',
 }
 
-export enum POST_TYPE {
+export enum POST_FILE_TYPE {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",
 }

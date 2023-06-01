@@ -95,7 +95,7 @@ export class AdminDashboardService {
     /// get most favorite music ///
     const allMusics = await this.musicModel.findAll({
       include: [
-        { model: Album, as: 'album' },
+        { model: Album, as: 'albums' },
         { model: MusicGenre, as: 'musicGenre' },
         { model: User, as: 'singer' },
         { model: Language, as: 'language' },

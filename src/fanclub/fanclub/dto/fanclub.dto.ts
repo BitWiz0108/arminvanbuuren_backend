@@ -1,3 +1,4 @@
+import { PostFile } from "@common/database/models/post-files.entity";
 import { LiveStream } from "@models/live-stream.entity";
 import { Music } from "@models/music.entity";
 import { Reply } from "@models/reply.entity";
@@ -58,11 +59,7 @@ export class PostAllDto {
     id: number;
     author: User;
     title: string;
-    type: string;
-    image: string;
-    imageCompressed: string;
-    video: string;
-    videoCompressed: string;
+    files: PostFile[];
     content: string;
     isFavorite: boolean;
     numberOfFavorites: number;
@@ -73,11 +70,7 @@ export class PostAllDtoWithReplies {
     id: number;
     author: User;
     title: string;
-    type: string;
-    image: string;
-    imageCompressed: string;
-    video: string;
-    videoCompressed: string;
+    files: PostFile[];
     content: string;
     isFavorite: boolean;
     numberOfFavorites: number;

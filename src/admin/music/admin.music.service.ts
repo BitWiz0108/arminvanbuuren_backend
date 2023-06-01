@@ -1,15 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Music } from '@models/music.entity';
-import { MusicOption } from './dto/music-option';
+import { MusicInputArg, MusicOption } from './dto/music-option';
 import { User } from '@models/user.entity';
 import { Album } from '@models/album.entity';
 import { MusicGenre } from '@common/database/models/music-genre.entity';
 import { Language } from '@models/language.entity';
-import { AdminMusicDto } from './dto/music.dto';
+import { AdminMusicDto, MusicWithAlbumIds } from './dto/music.dto';
 import * as sharp from 'sharp';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { AlbumMusic } from '@common/database/models/album-music.entity';
 
 @Injectable()
 export class AdminMusicService {
@@ -19,6 +20,9 @@ export class AdminMusicService {
   constructor(
     @InjectModel(Music)
     private readonly musicModel: typeof Music,
+
+    @InjectModel(AlbumMusic)
+    private readonly albumMusicModel: typeof AlbumMusic,
 
     private uploadService: UploadToS3Service,
   ) {
@@ -36,7 +40,7 @@ export class AdminMusicService {
   }
 
   async add(
-    data: Partial<Music>,
+    data: MusicInputArg,
     files: Express.Multer.File[],
   ): Promise<Music>{
 
@@ -44,18 +48,17 @@ export class AdminMusicService {
     const musicCompressedFile: Express.Multer.File = files[1];
     const coverImageFile: Express.Multer.File = files[2];
 
-    data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
+    const coverImageUrl = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
 
-    data.musicFile = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
-    data.musicFileCompressed = await this.uploadService.uploadFileToBucket(musicCompressedFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
-    
+    const musicFileUrl = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
+    const musicFileCompressedUrl = await this.uploadService.uploadFileToBucket(musicCompressedFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
+
     const newMusicItem: Music = await this.musicModel.create({
       userId: data.userId,
-      coverImage: data.coverImage,
-      musicFile: data.musicFile,
-      musicFileCompressed: data.musicFileCompressed,
+      coverImage: coverImageUrl,
+      musicFile: musicFileUrl,
+      musicFileCompressed: musicFileCompressedUrl,
       isExclusive: data.isExclusive,
-      albumId: data.albumId,
       duration: data.duration,
       title: data.title,
       musicGenreId: data.musicGenreId,
@@ -65,27 +68,57 @@ export class AdminMusicService {
       description: data.description,
       releaseDate: data.releaseDate
     });
+    
+    const albumIds = data.albumIds.split(",");
+
+    const promises = albumIds.map(async albumId => {
+      await this.albumMusicModel.create({
+        musicId: newMusicItem.id,
+        albumId: Number(albumId),
+      });
+    });
+
+    await Promise.all(promises);
 
     const newItem = await this.musicModel.findByPk(newMusicItem.id, {
       include: [
-        { model: Album, as: 'album' },
+        { model: Album, as: 'albums' },
         { model: MusicGenre, as: 'musicGenre' },
         { model: User, as: 'singer' },
         { model: Language, as: 'language' },
       ]
     });
-    
+
     return newItem;
   }
 
   async update(
-    data: Partial<Music>,
+    data: MusicInputArg,
     files: Express.Multer.File[],
   ): Promise<Music> {
-    const item = await this.musicModel.findByPk(data.id);
+    const item = await this.musicModel.findByPk(data.id, {
+      include: [
+        { model: Album, as: 'albums' }
+      ]
+    });
     if (!item) {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
+
+    const promises = item.albums.map(async album => {
+      const album_music = await this.albumMusicModel.findOne({
+        where: {
+          musicId: item.id,
+          albumId: album.id,
+        }
+      });
+      if (!album_music) {
+        throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
+      }
+      await album_music.destroy();
+    });
+
+    await Promise.all(promises);
 
     const musicFile: Express.Multer.File = files[0];
     const musicCompressedFile: Express.Multer.File = files[1];
@@ -104,15 +137,27 @@ export class AdminMusicService {
     }
 
     await item.update(data);
-    const updatedItem = this.musicModel.findByPk(data.id, {
+
+    const albumIds = data.albumIds.split(",");
+
+    const promises2 = albumIds.map(async albumId => {
+      await this.albumMusicModel.create({
+        musicId: item.id,
+        albumId: Number(albumId),
+      });
+    });
+
+    await Promise.all(promises2);
+
+    const updatedItem = await this.musicModel.findByPk(data.id, {
       include: [
-        { model: Album, as: 'album' },
+        { model: Album, as: 'albums' },
         { model: MusicGenre, as: 'musicGenre' },
         { model: User, as: 'singer' },
         { model: Language, as: 'language' },
       ]
     });
-
+    
     return updatedItem;
   }
 
@@ -120,9 +165,6 @@ export class AdminMusicService {
     const limit = Number(op.limit); // ensure limit is a number
     const page = Number(op.page);
     let orders: any = [];
-    if (op.albumName) {
-      orders.push([{ model: Album, as: 'album' }, 'name', op.albumName]);
-    }
     if (op.title) {
       orders.push(['title', op.title]);
     }
@@ -137,24 +179,50 @@ export class AdminMusicService {
       orders.push(['releaseDate', 'DESC']);
     }
 
-    const musics: Music[] = await this.musicModel.findAll({ 
+    const filteredMusics: Music[] = await this.musicModel.findAll({ 
       offset: (page - 1) * limit, 
       limit: limit,
       order: orders,
       include: [
-        { model: Album, as: 'album' },
+        { model: Album, as: 'albums' },
         { model: MusicGenre, as: 'musicGenre' },
         { model: User, as: 'singer' },
         { model: Language, as: 'language' },
       ]
     });
 
+    const promises = filteredMusics.map(async filteredMusic => {
+      const music: MusicWithAlbumIds = {
+        id: filteredMusic.id,
+        singer: filteredMusic.singer,
+        coverImage: filteredMusic.coverImage,
+        musicFile: filteredMusic.musicFile,
+        musicFileCompressed: filteredMusic.musicFileCompressed,
+        isExclusive: filteredMusic.isExclusive,
+        albums: filteredMusic.albums,
+        albumIds: filteredMusic.albumIds,
+        duration: filteredMusic.duration,
+        title: filteredMusic.title,
+        musicGenre: filteredMusic.musicGenre,
+        language: filteredMusic.language,
+        languageId: filteredMusic.languageId,
+        copyright: filteredMusic.copyright,
+        lyrics: filteredMusic.lyrics,
+        description: filteredMusic.description,
+        releaseDate: filteredMusic.releaseDate,
+        createdAt: filteredMusic.createdAt,
+      }
+      return music;
+    });
+
+    const musics = await Promise.all(promises);
+
     const totalItems = await this.musicModel.count();
     const pages: number = Math.ceil(totalItems / limit);
 
     const data: AdminMusicDto = {
       pages,
-      musics,
+      musics: musics,
     };
     return new Promise((resolve, reject) => {
       resolve(data);
@@ -168,8 +236,21 @@ export class AdminMusicService {
   async remove(id: number): Promise<void> {
     const item = await this.musicModel.findByPk(id);
     if (!item) {
-      throw new HttpException(`Music with id ${id} not found.`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
+
+    const albumMusics = await this.albumMusicModel.findAll({
+      where: {
+        musicId: id,
+      }
+    });
+
+    const promises = albumMusics.map(async albumMusic => {
+      await albumMusic.destroy();
+    });
+
+    await Promise.all(promises);
+
     await item.destroy();
   }
 }

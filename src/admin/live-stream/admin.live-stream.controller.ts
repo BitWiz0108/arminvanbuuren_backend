@@ -6,6 +6,7 @@ import { AdminLiveStreamService } from './admin.live-stream.service';
 import { LiveStream } from '@models/live-stream.entity';
 import { AdminGuard } from '@admin/admin.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { LiveStreamInputArg } from './dto/live-stream-option';
 
 @ApiBearerAuth()
 @ApiTags('Admin Live Stream')
@@ -20,7 +21,6 @@ export class AdminLiveStreamController {
       @Query('page') page: number, 
       @Query('limit') limit: number,
       @Query('title') title: string,
-      @Query('categoryName') categoryName: string,
       @Query('releaseDate') releaseDate: string,
       @Query('artistName') artistName: string,
     ) {
@@ -28,7 +28,6 @@ export class AdminLiveStreamController {
         page,
         limit,
         title,
-        categoryName,
         releaseDate,
         artistName
       });
@@ -38,7 +37,7 @@ export class AdminLiveStreamController {
     @HttpCode(HttpStatus.CREATED)
     @UseInterceptors(FilesInterceptor('files'))
     async add(
-      @Body() data: Partial<LiveStream>,
+      @Body() data: LiveStreamInputArg,
       @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
       const result = await this.livestreamService.add(data, files);
@@ -49,7 +48,7 @@ export class AdminLiveStreamController {
     @HttpCode(HttpStatus.ACCEPTED)
     @UseInterceptors(FilesInterceptor('files'))
     async update(
-      @Body() data: Partial<LiveStream>,
+      @Body() data: LiveStreamInputArg,
       @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
       const livestream = await this.livestreamService.update(data, files);

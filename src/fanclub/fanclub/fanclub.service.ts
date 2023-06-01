@@ -10,6 +10,7 @@ import { LiveStream } from '@models/live-stream.entity';
 import { Post } from '@models/post.entity';
 import { Reply } from '@models/reply.entity';
 import { PostLike } from '@models/post-like.entity';
+import { PostFile } from '@common/database/models/post-files.entity';
 
 @Injectable()
 export class FanclubService {
@@ -117,6 +118,7 @@ export class FanclubService {
         { model: Reply, as: 'replies', include: [{ model: User, as: 'replier' }] },
         { model: User, as: 'author' },
         { model: PostLike, as: 'likes' },
+        { model: PostFile, as: 'files' },
       ]
     });
     
@@ -131,11 +133,7 @@ export class FanclubService {
       const post : PostAllDto = {
         id: item.id,
         title: item.title,
-        type: item.type,
-        image: item.image,
-        imageCompressed: item.imageCompressed,
-        video: item.video,
-        videoCompressed: item.videoCompressed,
+        files: item.files,
         content: item.content,
         createdAt: item.createdAt,
         isFavorite: someoneLikeIt ? true : false,
@@ -176,11 +174,7 @@ export class FanclubService {
       const postWithReplies : PostAllDtoWithReplies = {
         id: post.id,
         title: post.title,
-        type: post.type,
-        image: post.image,
-        imageCompressed: post.imageCompressed,
-        video: post.video,
-        videoCompressed: post.videoCompressed,
+        files: post.files,
         content: post.content,
         createdAt: post.createdAt,
         author: post.author,

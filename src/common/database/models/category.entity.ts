@@ -13,6 +13,7 @@ import {
 } from 'sequelize-typescript';
 import { User } from './user.entity';
 import { LiveStream } from './live-stream.entity';
+import { CategoryLivestream } from './category-livestream.entity';
 
 @Table({ tableName: 'categories' })
 export class Category extends Model {
@@ -58,7 +59,7 @@ export class Category extends Model {
   @Column
   status: boolean;
 
-  @HasMany(() => LiveStream)
+  @BelongsToMany(() => LiveStream, () => CategoryLivestream)
   livestreams: LiveStream[]
 
   @Column({

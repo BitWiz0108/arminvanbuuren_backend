@@ -4,6 +4,7 @@ import { Category } from '@models/category.entity';
 import { User } from '@models/user.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { CategoryLivestream } from '@common/database/models/category-livestream.entity';
 
 @Injectable()
 export class AdminCategoryService {
@@ -12,6 +13,9 @@ export class AdminCategoryService {
   constructor(
     @InjectModel(Category)
     private readonly categoryModel: typeof Category,
+
+    @InjectModel(CategoryLivestream)
+    private readonly categoryLivestreamModel: typeof CategoryLivestream,
 
     private uploadService: UploadToS3Service,
   ) {
@@ -85,10 +89,19 @@ export class AdminCategoryService {
     if (!item) {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
-    try {
-      await item.destroy();
-    } catch (error) {
-      throw new HttpException(MESSAGE.FAILED_REMOVE_ITEM, HttpStatus.BAD_REQUEST);
-    }
+
+    const categoryLivestreams = await this.categoryLivestreamModel.findAll({
+      where: {
+        categoryId: id,
+      }
+    });
+
+    const promises = categoryLivestreams.map(async categoryLivestream => {
+      await categoryLivestream.destroy();
+    });
+
+    await Promise.all(promises);
+    
+    await item.destroy();
   }
 }

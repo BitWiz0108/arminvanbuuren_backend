@@ -59,9 +59,7 @@ export class LiveStreamService {
     }
     // end
 
-    const allItems = await this.livestreamModel.findAll(options);
-
-    const size = allItems.length;
+    const size = Number(await this.livestreamModel.count(options));
     
     const items = await this.livestreamModel.findAll({
       offset: (op.page - 1) * op.limit,
@@ -74,7 +72,7 @@ export class LiveStreamService {
     });
 
     const promises = items.map(async item => {
-      const someoneLikeIt = await this.favoriteLiveStreamModel.findOne({
+      const iLikeIt = await this.favoriteLiveStreamModel.count({
         where: {
           livestreamId: item.id,
           userId: op.userId
@@ -97,7 +95,7 @@ export class LiveStreamService {
         description: item.description,
         isExclusive: item.isExclusive,
         releaseDate: item.releaseDate,
-        isFavorite: someoneLikeIt ? true : false,
+        isFavorite: iLikeIt > 0,
       };
     
       return livestream;
@@ -220,19 +218,18 @@ export class LiveStreamService {
     });
 
     const categoryPromises = allCategories.map(async (category) => {
-      const livestreams = await this.livestreamModel.findAll({
-        where: { categoryId: category.id },
-        order: [['releaseDate', 'DESC']],
-        include: [
-          { model: User, as: 'singer' },
-          { model: User, as: 'creator' }
-        ]
+      category.livestreams.sort((a: LiveStream, b: LiveStream) => {
+        if (b.releaseDate > a.releaseDate) return 1;
+        else return 0;
       });
 
       let totalDuration: number = 0;
-      livestreams.map(livestream => {
+      category.livestreams.map(livestream => {
         totalDuration += livestream.duration;
       })
+
+      // pagination
+      const livestreams = category.livestreams.slice((op.page - 1) * op.limit, op.page * op.limit);
 
       const ctg = {
         id: category.id,
@@ -253,19 +250,26 @@ export class LiveStreamService {
   }
 
   async findAllLivestreamsForCategory(op: LiveStreamOptionForCategory): Promise<LiveStream[]> {
-    const livestreams: LiveStream[] = await this.livestreamModel.findAll({
-      offset: (op.page - 1) * op.limit, 
-      limit: op.limit,
-      order: [['releaseDate', 'DESC']],
-      where: {
-        isExclusive: op.isExclusive,
-        categoryId: op.categoryId
-      },
+    const category = await this.categoryModel.findByPk(op.categoryId, {
       include: [
-        { model: User, as: 'singer' },
-        { model: User, as: 'creator' },
+        { model: LiveStream, as: 'livestreams',
+          where: {
+            isExclusive: op.isExclusive,
+          },
+          include: [
+            { model: User, as: 'singer', },
+            { model: User, as: 'creator', },
+          ]
+        }
       ]
     });
+
+    category.livestreams.sort((a: LiveStream, b: LiveStream) => {
+      if (b.releaseDate > a.releaseDate) return 1;
+      else return 0;
+    });
+
+    const livestreams = category.livestreams.slice((op.page - 1) * op.limit, op.page * op.limit);
 
     return livestreams;
   }

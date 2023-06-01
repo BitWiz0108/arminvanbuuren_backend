@@ -24,6 +24,7 @@ import { AdminGalleryModule } from './gallery/admin.gallery.module';
 import { AdminHomeModule } from './home/admin.home.module';
 import { AdminAboutModule } from './about/admin.about.module';
 import { AdminPaymentGatewayModule } from './payment-gateway/admin.payment-gateway.module';
+import { AdminPrayerRequestModule } from './prayer-request/admin.prayer-request.module';
 import { AdminLoginBackgroundModule } from './login-background/admin.login-background.module';
 import { AdminCategoryModule } from './category/admin.category.module';
 import { AdminOAuthModule } from './oauth/admin.oauth.module';
@@ -53,6 +54,7 @@ import { AdminOAuthModule } from './oauth/admin.oauth.module';
     AdminLoginBackgroundModule,
     AdminCategoryModule,
     AdminOAuthModule,
+    AdminPrayerRequestModule,
   ],
   controllers: [],
   providers: [

@@ -24,7 +24,7 @@ export class AdminPostController {
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FilesInterceptor('files'))
   async add(
-    @Body() data: PostPayloadDto, 
+    @Body() data: PostPayloadDto,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
     return this.postService.add(data, files);

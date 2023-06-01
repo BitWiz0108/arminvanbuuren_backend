@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@common-modules/auth/role.enum';
 import { Roles } from '@common-modules/auth/roles.decorator';
 import { AdminMusicService } from './admin.music.service';
-import { MusicOption } from './dto/music-option';
+import { MusicInputArg, MusicOption } from './dto/music-option';
 import { Music } from '@models/music.entity';
 import { AdminGuard } from '@admin/admin.guard';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -21,18 +21,17 @@ export class AdminMusicController {
       @Query('page') page: number,
       @Query('limit') limit: number,
       @Query('title') title: string,
-      @Query('albumName') albumName: string,
       @Query('releaseDate') releaseDate: string,
       @Query('artistName') artistName: string,
     ) {
-      return this.musicService.findAll({page, limit, title, albumName, releaseDate, artistName});
+      return this.musicService.findAll({page, limit, title, releaseDate, artistName});
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @UseInterceptors(FilesInterceptor('files'))
     async add(
-      @Body() data: Partial<Music>, 
+      @Body() data: MusicInputArg, 
       @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
       const result = await this.musicService.add(data, files);
@@ -43,7 +42,7 @@ export class AdminMusicController {
     @HttpCode(HttpStatus.ACCEPTED)
     @UseInterceptors(FilesInterceptor('files'))
     async update(
-      @Body() data: Partial<Music>,
+      @Body() data: MusicInputArg,
       @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
       const music = await this.musicService.update(data, files);

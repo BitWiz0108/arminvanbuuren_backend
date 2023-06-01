@@ -12,6 +12,7 @@ import { TOSModule } from './terms-of-service/tos.module';
 import { AboutModule } from './about/about.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { HomeModule } from './home/home.module';
+import { PrayerRequestModule } from './prayer-request/prayer-request.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { HomeModule } from './home/home.module';
     AboutModule,
     GalleryModule,
     HomeModule,
+    PrayerRequestModule,
   ],
   controllers: [],
   providers: [],

@@ -6,6 +6,7 @@ export class PostListOption {
 export class PostPayloadDto {
   authorId: number;
   title: string;
+  types: string;
   content: string;
 }
 
@@ -14,4 +15,6 @@ export class PostPartialDto {
   authorId: number;
   title: string;
   content: string;
+  ids: string;
+  types: string;
 }

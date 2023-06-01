@@ -15,6 +15,7 @@ import { User } from './user.entity';
 import { Language } from './language.entity';
 import { LiveStreamComment } from './live-stream-comment.entity';
 import { Category } from './category.entity';
+import { CategoryLivestream } from './category-livestream.entity';
 
 @Table({ tableName: 'live_streams', timestamps: false, }) // disable timestamps for this entity
 export class LiveStream extends Model {
@@ -42,13 +43,6 @@ export class LiveStream extends Model {
 
   @BelongsTo(() => User)
   creator: User;
-
-  @ForeignKey(() => Category)
-  @Column({ field: 'category_id' })
-  categoryId: number;
-
-  @BelongsTo(() => Category)
-  category: Category
 
   @Column
   duration: number;
@@ -100,6 +94,19 @@ export class LiveStream extends Model {
     type: DataType.DATE,
   })
   updatedAt: Date;
+
+  get categoryIds(): number[] {
+    let categoryIds = [];
+
+    this.categories.map(category => {
+      categoryIds.push(category.id);
+    });
+
+    return categoryIds;
+  }
+
+  @BelongsToMany(() => Category, () => CategoryLivestream)
+  categories: Category[];
 
   @HasMany(() => Favorite)
   favorites: Favorite[];

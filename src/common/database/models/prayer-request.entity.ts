@@ -12,28 +12,15 @@ import {
   HasMany,
 } from 'sequelize-typescript';
 import { User } from './user.entity';
-import { Reply } from './reply.entity';
-import { PostLike } from './post-like.entity';
-import { PostFile } from './post-files.entity';
+import { PrayerReply } from './prayer-reply.entity';
+import { Prayer } from './prayer.entity';
 
-@Table({ tableName: 'posts', })
-export class Post extends Model {
+@Table({ tableName: 'prayer_requests', })
+export class PrayerRequest extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
   id: number;
-
-  @Column
-  image: string
-
-  @Column({ field: 'image_compressed' })
-  imageCompressed: string
-
-  @Column
-  video: string
-
-  @Column({ field: 'video_compressed' })
-  videoCompressed: string
 
   @ForeignKey(() => User)
   @Column({ field: 'user_id' })
@@ -48,8 +35,14 @@ export class Post extends Model {
   @Column
   content: string;
   
-  @HasMany(() => Reply)
-  replies: Reply[];
+  @Column({field: 'is_anonymous'})
+  isAnonymous: boolean;
+
+  @Column({field: 'is_approved'})
+  isApproved: boolean;
+
+  @HasMany(() => PrayerReply)
+  replies: PrayerReply[];
 
   @Column({
     field: 'created_at',
@@ -64,13 +57,10 @@ export class Post extends Model {
   })
   updatedAt: Date;
 
-  @HasMany(() => PostFile)
-  files: PostFile[];
+  @HasMany(() => Prayer)
+  prayers: Prayer[];
 
-  @HasMany(() => PostLike)
-  likes: PostLike[];
-
-  get likedBy(): number {
-    return this.likes.length;
+  get prayedBy(): number {
+    return this.prayers.length;
   }
 }

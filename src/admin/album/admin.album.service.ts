@@ -4,6 +4,7 @@ import { Album } from '@models/album.entity';
 import { User } from '@models/user.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
+import { AlbumMusic } from '@common/database/models/album-music.entity';
 
 @Injectable()
 export class AdminAlbumService {
@@ -12,6 +13,9 @@ export class AdminAlbumService {
   constructor(
     @InjectModel(Album)
     private readonly albumModel: typeof Album,
+
+    @InjectModel(AlbumMusic)
+    private readonly albumMusicModel: typeof AlbumMusic,
 
     private uploadService: UploadToS3Service,
   ) {
@@ -85,10 +89,19 @@ export class AdminAlbumService {
     if (!item) {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
-    try {
-      await item.destroy();
-    } catch (error) {
-      throw new HttpException(MESSAGE.FAILED_REMOVE_ITEM, HttpStatus.BAD_REQUEST);
-    }
+
+    const albumMusics = await this.albumMusicModel.findAll({
+      where: {
+        albumId: id,
+      }
+    });
+
+    const promises = albumMusics.map(async albumMusic => {
+      await albumMusic.destroy();
+    });
+
+    await Promise.all(promises);
+
+    await item.destroy();
   }
 }

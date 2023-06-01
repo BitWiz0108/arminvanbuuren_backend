@@ -9,9 +9,10 @@ import { Favorite } from '@models/favorite.entity';
 import { Album } from '@models/album.entity';
 import { MusicGenre } from '@common/database/models/music-genre.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
+import { AlbumMusic } from '@common/database/models/album-music.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Music, User, Language, Favorite, Album, MusicGenre, ])],
+  imports: [SequelizeModule.forFeature([Music, User, Language, Favorite, Album, MusicGenre, AlbumMusic, ])],
   providers: [ AdminMusicService, UploadToS3Service, ],
   controllers: [ AdminMusicController ],
 })

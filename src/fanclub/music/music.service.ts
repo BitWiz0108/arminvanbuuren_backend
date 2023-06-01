@@ -40,7 +40,7 @@ export class MusicService {
       ]
     });
     const promises = items.map(async item => {
-      const someoneLikeIt = await this.favoriteMusicModel.findOne({
+      const iLikeIt = await this.favoriteMusicModel.count({
         where: {
           musicId: item.id,
           userId: op.userId
@@ -57,7 +57,7 @@ export class MusicService {
         lyrics: item.lyrics,
         description: item.description,
         isExclusive: item.isExclusive,
-        isFavorite: someoneLikeIt ? true : false,
+        isFavorite: iLikeIt > 0,
         singer: item.singer,
       };
       
@@ -87,16 +87,20 @@ export class MusicService {
     });
 
     const albumPromises = allAlbums.map(async (album) => {
-      const musicsForEachAlbum = await this.musicModel.findAll({
-        where: { albumId: album.id },
-        order: [['releaseDate', 'DESC']],
-        include: [
-          { model: User, as: 'singer' }
-        ]
+      album.musics.sort((a: Music, b: Music) => {
+        if (b.releaseDate > a.releaseDate) return 1;
+        else return 0;
+      });
+  
+      const musicsForEachAlbum = album.musics.slice((op.page - 1) * op.limit, op.page * op.limit);
+      
+      let totalDuration: number = 0;
+      album.musics.map(music => {
+        totalDuration += music.duration;
       });
 
       const promises = musicsForEachAlbum.map(async (item) => {
-        const someoneLikeIt = await this.favoriteMusicModel.findOne({
+        const iLikeThis = await this.favoriteMusicModel.count({
           where: {
             musicId: item.id,
             userId: op.userId
@@ -112,18 +116,13 @@ export class MusicService {
           lyrics: item.lyrics,
           description: item.description,
           isExclusive: item.isExclusive,
-          isFavorite: someoneLikeIt ? true : false,
+          isFavorite: iLikeThis > 0,
           singer: item.singer,
         };
 
         return music;
       });
       const musics = await Promise.all(promises);
-
-      let totalDuration: number = 0;
-      musics.map(music => {
-        totalDuration += music.duration;
-      })
 
       const alb = {
         id: album.id,
@@ -136,29 +135,38 @@ export class MusicService {
         musics
       }
       return alb;
-    });
+    }); 
 
     const data = await Promise.all(albumPromises);
-
     return data;
   }
 
   async findAllMusicsForAlbum(op: MusicOptionForAlbum): Promise<MusicWithFavorite[]> {
-    let data: MusicAllDto;
-    const items = await this.musicModel.findAll({ 
-      offset: (op.page - 1) * op.limit, 
-      limit: op.limit,
-      order: [['releaseDate', 'DESC']],
-      where: {
-        isExclusive: op.isExclusive,
-        albumId: op.albumId
-      },
+    const album = await this.albumModel.findByPk(op.albumId, {
       include: [
-        { model: User, as: 'singer' },
+        {
+          model: Music, as: 'musics',
+          where: {
+            isExclusive: op.isExclusive,
+          },
+          include: [
+            {
+              model: User, as: 'singer',
+            }
+          ]
+        }
       ]
     });
+
+    album.musics.sort((a: Music, b: Music) => {
+      if (b.releaseDate > a.releaseDate) return 1;
+      else return 0;
+    });
+
+    const items = album.musics.slice((op.page - 1) * op.limit, op.page * op.limit);
+
     const promises = items.map(async item => {
-      const someoneLikeIt = await this.favoriteMusicModel.findOne({
+      const iLikeThis = await this.favoriteMusicModel.count({
         where: {
           musicId: item.id,
           userId: op.userId
@@ -175,7 +183,7 @@ export class MusicService {
         lyrics: item.lyrics,
         description: item.description,
         isExclusive: item.isExclusive,
-        isFavorite: someoneLikeIt ? true : false,
+        isFavorite: iLikeThis > 0,
         singer: item.singer,
       };
       

@@ -16,6 +16,7 @@ import { User } from './user.entity';
 import { Album } from './album.entity';
 import { Language } from './language.entity';
 import { MusicGenre } from './music-genre.entity';
+import { AlbumMusic } from './album-music.entity';
 
 @Table({ tableName: 'musics', })
 export class Music extends Model {
@@ -36,12 +37,17 @@ export class Music extends Model {
   @Column({ field: 'download_price' })
   downloadPrice: number;
 
-  @ForeignKey(() => Album)
-  @Column({ field: 'album_id' })
-  albumId: number;
+  // albumIds: number[];
 
-  @BelongsTo(() => Album)
-  album: Album
+  get albumIds(): number[] {
+    let albumIds = [];
+
+    this.albums.map(album => {
+      albumIds.push(album.id);
+    });
+
+    return albumIds;
+  }
 
   @Column
   duration: number;
@@ -114,6 +120,9 @@ export class Music extends Model {
   
   @Column({ field: 'is_exclusive' })
   isExclusive: boolean;
+
+  @BelongsToMany(() => Album, () => AlbumMusic)
+  albums: Album[];
 
   @HasMany(() => Favorite)
   favorites: Favorite[];

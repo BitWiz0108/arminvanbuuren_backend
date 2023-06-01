@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
-import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE, POST_TYPE } from '@common/constants';
+import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE, POST_FILE_TYPE } from '@common/constants';
 import { Gallery } from '@common/database/models/gallery.entity';
 import { GalleryDto } from './dto/gallery.dto';
 
@@ -23,14 +23,14 @@ export class AdminGalleryService {
   }
 
   async add(data: Partial<Gallery>, files: Express.Multer.File[]): Promise<Gallery> {
-    if (data.type == POST_TYPE.IMAGE) {
+    if (data.type == POST_FILE_TYPE.IMAGE) {
       if (files[0]?.size)
         data.image = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.IMAGE, false, this.bucketOption);
       if (files[1]?.size)
         data.imageCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
     
-    if (data.type == POST_TYPE.VIDEO) {
+    if (data.type == POST_FILE_TYPE.VIDEO) {
       if (files[0]?.size)
         data.video = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.VIDEO, false, this.bucketOption);
       if (files[1]?.size)
@@ -55,14 +55,14 @@ export class AdminGalleryService {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
 
-    if (data.type == POST_TYPE.IMAGE) {
+    if (data.type == POST_FILE_TYPE.IMAGE) {
       if (files[0]?.size)
         data.image = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.IMAGE, false, this.bucketOption);
       if (files[1]?.size)
         data.imageCompressed = await this.uploadService.uploadFileToBucket(files[1], ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
     
-    if (data.type == POST_TYPE.VIDEO) {
+    if (data.type == POST_FILE_TYPE.VIDEO) {
       if (files[0]?.size)
         data.video = await this.uploadService.uploadFileToBucket(files[0], ASSET_TYPE.VIDEO, false, this.bucketOption);
       if (files[1]?.size)

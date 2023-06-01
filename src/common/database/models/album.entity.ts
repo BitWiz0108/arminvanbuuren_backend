@@ -13,6 +13,7 @@ import {
 } from 'sequelize-typescript';
 import { User } from './user.entity';
 import { Music } from './music.entity';
+import { AlbumMusic } from './album-music.entity';
 
 @Table({ tableName: 'albums' })
 export class Album extends Model {
@@ -58,8 +59,8 @@ export class Album extends Model {
   @Column
   status: boolean;
 
-  @HasMany(() => Music)
-  musics: Music[]
+  @BelongsToMany(() => Music, () => AlbumMusic)
+  musics: Music[];
 
   @Column({
     field: 'created_at',

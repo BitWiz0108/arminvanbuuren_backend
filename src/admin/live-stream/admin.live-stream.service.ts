@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { LiveStream } from '@models/live-stream.entity';
-import { AdminLiveStreamOption } from './dto/live-stream-option';
-import { AdminLiveStreamDto, } from './dto/live-stream-dto';
+import { AdminLiveStreamOption, LiveStreamInputArg } from './dto/live-stream-option';
+import { AdminLiveStreamDto, LiveStreamWithCategoryIds, } from './dto/live-stream-dto';
 import { User } from '@models/user.entity';
 import { Language } from '@models/language.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
@@ -10,6 +10,7 @@ import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/const
 import { LiveStreamComment } from '@common/database/models/live-stream-comment.entity';
 import { Identifier } from 'sequelize';
 import { Category } from '@common/database/models/category.entity';
+import { CategoryLivestream } from '@common/database/models/category-livestream.entity';
 
 @Injectable()
 export class AdminLiveStreamService {  
@@ -22,6 +23,9 @@ export class AdminLiveStreamService {
 
     @InjectModel(LiveStreamComment)
     private readonly lsCommentModel: typeof LiveStreamComment,
+
+    @InjectModel(CategoryLivestream)
+    private readonly categoryLivestreamModel: typeof CategoryLivestream,
 
     private uploadService: UploadToS3Service,
   ) {
@@ -38,7 +42,7 @@ export class AdminLiveStreamService {
   }
     
   async add(
-    data: Partial<LiveStream>,
+    data: LiveStreamInputArg,
     files: Express.Multer.File[],
   ): Promise<LiveStream> {
 
@@ -48,7 +52,7 @@ export class AdminLiveStreamService {
     const fullVideoFile: Express.Multer.File = files[3];
     const fullVideoFileCompressed: Express.Multer.File = files[4];
 
-    data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
+    const coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
     
     if (previewVideoFile?.size) {
       data.previewVideo = await this.uploadService.uploadFileToBucket(previewVideoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
@@ -65,11 +69,10 @@ export class AdminLiveStreamService {
     }
 
     const newLiveStream:LiveStream = await this.livestreamModel.create({
-      coverImage: data.coverImage,
+      coverImage: coverImage,
       title: data.title,
       singerId: data.singerId,
       creatorId: data.creatorId,
-      categoryId: data.categoryId,
       duration: data.duration,
       releaseDate: data.releaseDate,
       previewVideo: data.previewVideo,
@@ -82,12 +85,23 @@ export class AdminLiveStreamService {
       isExclusive: data.isExclusive
     });
 
-    const newItem = this.livestreamModel.findByPk(newLiveStream.id, {
+    const categoryIds = data.categoryIds.split(",");
+
+    const promises = categoryIds.map(async categoryId => {
+      await this.categoryLivestreamModel.create({
+        livestreamId: newLiveStream.id,
+        categoryId: Number(categoryId),
+      });
+    });
+
+    await Promise.all(promises);
+
+    const newItem = await this.livestreamModel.findByPk(newLiveStream.id, {
       include: [
         { model: User, as: 'singer' },
         { model: User, as: 'creator' },
         { model: Language, as: 'language' },
-        { model: Category, as: 'category' },
+        { model: Category, as: 'categories' },
       ]
     });
 
@@ -95,13 +109,32 @@ export class AdminLiveStreamService {
   }
 
   async update(
-    data: Partial<LiveStream>,
+    data: LiveStreamInputArg,
     files: Express.Multer.File[],
   ): Promise<LiveStream> {
-    const item = await this.livestreamModel.findByPk(data.id);
+    const item = await this.livestreamModel.findByPk(data.id, {
+      include: [
+        { model: Category, as: 'categories' }
+      ]
+    });
     if (!item) {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
+
+    const promises = item.categories.map(async category => {
+      const category_livestream = await this.categoryLivestreamModel.findOne({
+        where: {
+          categoryId: category.id,
+          livestreamId: data.id,
+        }
+      });
+      if (!category_livestream) {
+        throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
+      }
+      await category_livestream.destroy();
+    });
+
+    await Promise.all(promises);
 
     const coverImageFile: Express.Multer.File = files[0];
     const previewVideoFile: Express.Multer.File = files[1];
@@ -130,15 +163,27 @@ export class AdminLiveStreamService {
     }
 
     await item.update(data);
-    const updatedItem = this.livestreamModel.findByPk(data.id, {
+
+    const categoryIds = data.categoryIds.split(",");
+
+    const promises2 = categoryIds.map(async categoryId => {
+      await this.categoryLivestreamModel.create({
+        livestreamId: item.id,
+        categoryId: Number(categoryId),
+      });
+    });
+
+    await Promise.all(promises2);
+
+    const updatedItem = await this.livestreamModel.findByPk(data.id, {
       include: [
         { model: User, as: 'singer' },
         { model: User, as: 'creator' },
         { model: Language, as: 'language' },
-        { model: Category, as: 'category' },
+        { model: Category, as: 'categories' },
       ]
     });
-
+    
     return updatedItem;
   }
 
@@ -150,10 +195,6 @@ export class AdminLiveStreamService {
 
     if (op.title) {
       orders.push(['title', op.title]);
-    }
-
-    if (op.categoryName) {
-      orders.push([{ model: Category, as: 'category' }, 'name', op.categoryName]);
     }
 
     if (op.releaseDate) {
@@ -168,7 +209,7 @@ export class AdminLiveStreamService {
       orders.push(['releaseDate', 'DESC']);
     }
 
-    const livestreams: LiveStream[] = await this.livestreamModel.findAll({ 
+    const filteredLivestreams: LiveStream[] = await this.livestreamModel.findAll({ 
       offset: (page - 1) * limit,
       limit: limit,
       order: orders,
@@ -176,9 +217,34 @@ export class AdminLiveStreamService {
         { model: User, as: 'singer' },
         { model: User, as: 'creator' },
         { model: Language, as: 'language' },
-        { model: Category, as: 'category' },
+        { model: Category, as: 'categories' },
       ]
     });
+
+    const promises = filteredLivestreams.map(async filteredLivestream => {
+      const livestream: LiveStreamWithCategoryIds = {
+        id: filteredLivestream.id,
+        coverImage: filteredLivestream.coverImage,
+        title: filteredLivestream.title,
+        singer: filteredLivestream.singer,
+        creator: filteredLivestream.creator,
+        releaseDate: filteredLivestream.releaseDate,
+        previewVideo: filteredLivestream.previewVideo,
+        previewVideoCompressed: filteredLivestream.previewVideoCompressed,
+        fullVideo: filteredLivestream.fullVideo,
+        fullVideoCompressed: filteredLivestream.fullVideoCompressed,
+        lyrics: filteredLivestream.lyrics,
+        description: filteredLivestream.description,
+        duration: filteredLivestream.duration,
+        shortDescription: filteredLivestream.shortDescription,
+        isExclusive: filteredLivestream.isExclusive,
+        categoryIds: filteredLivestream.categoryIds,
+        categories: filteredLivestream.categories,
+      }
+      return livestream;
+    });
+
+    const livestreams = await Promise.all(promises);
 
     const totalItems = await this.livestreamModel.count();
     const pages: number = Math.ceil(totalItems / limit);
@@ -201,6 +267,19 @@ export class AdminLiveStreamService {
     if (!item) {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
+
+    const categoryLivestreams = await this.categoryLivestreamModel.findAll({
+      where: {
+        livestreamId: id,
+      }
+    });
+
+    const promises = categoryLivestreams.map(async categoryLivestream => {
+      await categoryLivestream.destroy();
+    });
+
+    await Promise.all(promises);
+
     await item.destroy();
   }
 
