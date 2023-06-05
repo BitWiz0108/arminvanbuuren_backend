@@ -17,6 +17,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       request.path === `/${process.env.API_VERSION}/auth/servertime` ||
       request.path === `/${process.env.API_VERSION}/auth/signin` ||
       request.path === `/${process.env.API_VERSION}/auth/signup` ||
+      request.path === `/${process.env.API_VERSION}/auth/oauth` ||
       request.path === `/${process.env.API_VERSION}/fanclub/artist` ||
       request.path === `/${process.env.API_VERSION}/termsofservice` ||
       request.path === `/${process.env.API_VERSION}/home` ||
