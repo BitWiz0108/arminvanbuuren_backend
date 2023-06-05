@@ -1,8 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { FanclubArtistInfoDto, FanclubHighlightsDto, FavoritePostDoneDto, FavoritePostDto, PostAllDto, PostAllDtoWithReplies, PostAllPaginatedDto, PostOptionDto, ReplyOptionDto, ReplyPaginatedDto } from './dto/fanclub.dto';
+import { FanclubArtistInfoDto, FanclubHighlightsDto, FavoritePostDoneDto, FavoritePostDto, PostAllDto, PostAllDtoWithReplies, PostAllPaginatedDto, PostByTitle, PostOptionDto, ReplyOptionDto, ReplyPaginatedDto } from './dto/fanclub.dto';
 import { User } from '@models/user.entity';
-import { ArtistGenre } from '@common/database/models/artist-genre.entity';
 import { Album } from '@models/album.entity';
 import { ROLES } from '@common-modules/auth/role.enum';
 import { Music } from '@models/music.entity';
@@ -11,6 +10,8 @@ import { Post } from '@models/post.entity';
 import { Reply } from '@models/reply.entity';
 import { PostLike } from '@models/post-like.entity';
 import { PostFile } from '@common/database/models/post-files.entity';
+import { Op } from 'sequelize';
+import { MESSAGE } from '@common/constants';
 
 @Injectable()
 export class FanclubService {
@@ -36,16 +37,19 @@ export class FanclubService {
   ) {}
 
   async getArtistInfo(): Promise<FanclubArtistInfoDto> {
-    const artist = await this.userModel.findByPk(1, {
-      include: [
-        { model: Album, as: 'albums' },
-      ]
-    });
-
     const numberOfFans = await this.userModel.count({
       where: {
         role_id: ROLES.FAN
       }
+    });
+
+    const artist = await this.userModel.findOne({
+      where: {
+        roleId: ROLES.ADMIN,
+      },
+      include: [
+        { model: Album, as: 'albums' },
+      ]
     });
 
     const numberOfPosts = await this.postModel.count({
@@ -64,7 +68,7 @@ export class FanclubService {
       where: {
         singerId: artist.id,
       }
-    })
+    });
 
     let albumNames : string[] = [];
     artist.albums.forEach(album => {
@@ -104,13 +108,14 @@ export class FanclubService {
       siteTitle: artist.siteTitle,
       siteDescription: artist.siteDescription,
       siteSocialPreviewImage: artist.siteSocialPreviewImage,
+      subscriptionDescription: artist.subscriptionDescription,
     }
 
     return data;
   }
 
   async findAllPosts(op: PostOptionDto) : Promise<PostAllPaginatedDto> {
-    const items = await this.postModel.findAll({ 
+    const items = await this.postModel.findAll({
       offset: (op.page - 1) * op.limit,
       limit: op.limit,
       order: [['createdAt', 'DESC']],
@@ -161,6 +166,7 @@ export class FanclubService {
           { model: Reply, as: 'replies', include: [{ model: User, as: 'replier' }] },
           { model: User, as: 'author' },
           { model: PostLike, as: 'likes' },
+          { model: PostFile, as: 'files' },
         ]
       });
   
@@ -186,6 +192,103 @@ export class FanclubService {
       return postWithReplies;
     } catch (error) {
       throw new HttpException("Failed to get a post", HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async getPostByTitle(data: PostByTitle): Promise<PostAllDtoWithReplies[]> {
+    let posts: PostAllDtoWithReplies[] = [];
+
+    try {
+      const post = await this.postModel.findOne({
+        where: {
+          title: {
+            [Op.like]: `%${data.title}%`
+          },
+        },
+        include: [
+          { model: Reply, as: 'replies', include: [{ model: User, as: 'replier' }] },
+          { model: User, as: 'author' },
+          { model: PostLike, as: 'likes' },
+          { model: PostFile, as: 'files' },
+        ]
+      });
+  
+      const someoneLikeIt = await this.favoritePostModel.count({
+        where: {
+          postId: post.id,
+          userId: data.userId
+        }
+      });
+
+      const currentPost : PostAllDtoWithReplies = {
+        id: post.id,
+        title: post.title,
+        files: post.files,
+        content: post.content,
+        createdAt: post.createdAt,
+        author: post.author,
+        isFavorite: someoneLikeIt > 0,
+        numberOfFavorites: post.likedBy,
+        replies: post.replies
+      };
+  
+      const allPosts = await this.postModel.findAll({
+        include: [
+          { model: Reply, as: 'replies', include: [{ model: User, as: 'replier' }] },
+          { model: User, as: 'author' },
+          { model: PostLike, as: 'likes' },
+          { model: PostFile, as: 'files' },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      const promises = allPosts.map(async item => {
+        const someoneLikeIt = await this.favoritePostModel.count({
+          where: {
+            postId: item.id,
+            userId: data.userId
+          }
+        });
+  
+        const postWithReply : PostAllDtoWithReplies = {
+          id: item.id,
+          title: item.title,
+          files: item.files,
+          content: item.content,
+          createdAt: item.createdAt,
+          author: item.author,
+          isFavorite: someoneLikeIt > 0,
+          numberOfFavorites: item.likedBy,
+          replies: item.replies
+        };
+
+        return postWithReply;
+      });
+  
+      const allPostsWithReplies = await Promise.all(promises);
+
+      const totalListSize = await this.postModel.count();
+
+      const currentIndex = allPostsWithReplies.findIndex(post => post.id === currentPost.id);
+
+      let prevPost: any = null;
+      let nextPost: any = null;
+
+      if (totalListSize >= 3) {
+        nextPost = allPostsWithReplies[(currentIndex + 1) % totalListSize];
+        prevPost = allPostsWithReplies[(currentIndex - 1 + totalListSize) % totalListSize];
+      } else {
+        if (currentIndex > 0) prevPost = allPostsWithReplies[currentIndex - 1];
+        if (currentIndex < totalListSize - 1) nextPost = allPostsWithReplies[currentIndex + 1];
+      }
+
+      posts.push(prevPost);
+      posts.push(currentPost);
+      posts.push(nextPost);
+
+      return posts;
+    } catch (error) {
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
   }
 

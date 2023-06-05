@@ -21,7 +21,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       request.path === `/${process.env.API_VERSION}/termsofservice` ||
       request.path === `/${process.env.API_VERSION}/home` ||
       request.path === `/${process.env.API_VERSION}/admin/login-background` ||
-      ( request.path === `/${process.env.API_VERSION}/admin/oauth` && request.method === 'GET' )
+      ( request.path === `/${process.env.API_VERSION}/admin/oauth` && request.method === 'GET' ) ||
+      request.path === `/${process.env.API_VERSION}/finance/create-payment`
     ) {
       return true;
     }

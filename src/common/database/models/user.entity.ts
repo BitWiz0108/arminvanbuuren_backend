@@ -53,7 +53,13 @@ export class User extends Model {
   role: Role;
 
   @Column({ field: 'facebook_id' })
-  facebookId: number;
+  facebookId: string;
+
+  @Column({ field: 'google_id' })
+  googleId: string;
+
+  @Column({ field: 'apple_id' })
+  appleId: string;
 
   @Column({
     field: 'artist_verify_status',
@@ -188,6 +194,9 @@ export class User extends Model {
 
   @Column({ field: 'site_social_preview_image' })
   siteSocialPreviewImage: string;
+
+  @Column({ field: 'subscription_description'})
+  subscriptionDescription: string;
 
   @Column({
     field: 'created_at',

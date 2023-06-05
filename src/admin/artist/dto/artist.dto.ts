@@ -30,4 +30,10 @@ export class AdminArtistInfoDto {
   siteTitle: string;
   siteDescription: string;
   siteSocialPreviewImage: string;
+  subscriptionDescription: string;
+}
+
+export class SubscriptionDto {
+  artistId: number;
+  content: string;
 }

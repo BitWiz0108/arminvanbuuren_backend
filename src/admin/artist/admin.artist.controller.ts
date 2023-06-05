@@ -4,6 +4,7 @@ import { AdminArtistService } from './admin.artist.service';
 import { AdminGuard } from '@admin/admin.guard';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { User } from '@models/user.entity';
+import { SubscriptionDto } from './dto/artist.dto';
 
 @ApiBearerAuth()
 @ApiTags('Admin Artist')
@@ -31,5 +32,19 @@ export class AdminArtistController {
       data,
       files,
     );
+  }
+
+  @Get('subscription-description')
+  @HttpCode(HttpStatus.OK)
+  async getSubscriptionDescription(
+    @Query('artistId') artistId: number
+  ) {
+    return await this.artistService.getSubscriptionDescription(artistId);
+  }
+
+  @Put('subscription-description')
+  @HttpCode(HttpStatus.ACCEPTED)
+  async updateSubscriptionDescription(@Body() data: SubscriptionDto) {
+    return await this.artistService.updateSubscriptionDescription(data);
   }
 }

@@ -31,3 +31,9 @@ export class CategoriesWithLiveStreams {
   hours: number; // in seconds
   livestreams: LiveStream[]
 }
+
+export class LivestreamByTitle {
+  userId: number;
+  title: string;
+  hasMemebership: boolean;
+}

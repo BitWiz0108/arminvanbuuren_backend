@@ -20,9 +20,9 @@ export class OAuth extends Model {
 
   @Column({
     field: 'provider',
-    type: DataType.ENUM ('FACEBOOK', 'TWITTER', 'INSTAGRAM', 'AMAZON', 'GITHUB', 'LINKEDIN', 'YOUTUBE')
+    type: DataType.ENUM ('FACEBOOK', 'TWITTER', 'INSTAGRAM', 'AMAZON', 'GITHUB', 'LINKEDIN', 'YOUTUBE', 'GOOGLE', 'APPLE')
   })
-  provider: 'FACEBOOK' | 'TWITTER' | 'INSTAGRAM' | 'AMAZON' | 'GITHUB' | 'LINKEDIN' | 'YOUTUBE';
+  provider: 'FACEBOOK' | 'TWITTER' | 'INSTAGRAM' | 'AMAZON' | 'GITHUB' | 'LINKEDIN' | 'YOUTUBE' | 'GOOGLE' | 'APPLE';
 
   @Column({ field: 'app_id' })
   appId: string;

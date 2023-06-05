@@ -3,12 +3,13 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import Stripe from 'stripe';
 import * as paypal from "@paypal/checkout-server-sdk";
-import { PAYMENT_METHODS, PAYMENT_STATUS, TRANSACTION_TYPES } from '@common/constants';
+import { MESSAGE, PAYMENT_METHODS, PAYMENT_STATUS, PRODUCTION_MODE, TRANSACTION_TYPES } from '@common/constants';
 import { Plan } from '@common/database/models/plan.entity';
 import { Currency } from '@common/database/models/currency.entity';
 import { User } from '@common/database/models/user.entity';
 import * as moment from 'moment';
 import { PaymentGateway } from '@common/database/models/payment-gateway.entity';
+import { CreatePaymentDto, PaymentGatewayDto } from './dto/payment-gateway.dto';
 
 @Injectable()
 export class FinanceService {
@@ -138,5 +139,82 @@ export class FinanceService {
     /// end - update user info about subscribed plan ///
 
     return transaction;
+  }
+
+  async getPaymentGateways(): Promise<PaymentGatewayDto> {
+    const cnt = this.pgModel.count();
+    if (!cnt) {
+      throw new HttpException(MESSAGE.NEED_PAYMENT_GATEWAY_INITIALIZE, HttpStatus.BAD_REQUEST);
+    }
+
+    const pg: PaymentGateway = await this.pgModel.findByPk(1);
+
+    const data: PaymentGatewayDto = {
+      paypalClientId: pg.paypalClientId,
+      stripePublicApiKey: pg.stripePublicApiKey,
+    };
+
+    return data;
+  }
+
+  async createPayment(data: CreatePaymentDto): Promise<any> {
+    const cnt = this.pgModel.count();
+    if (!cnt) {
+      throw new HttpException(MESSAGE.NEED_PAYMENT_GATEWAY_INITIALIZE, HttpStatus.BAD_REQUEST);
+    }
+
+    const pg: PaymentGateway = await this.pgModel.findByPk(1);
+    
+    if (data.provider == PAYMENT_METHODS.PAYPAL) {
+      try {
+        // Create a PayPal client with your sandbox or live credentials
+        const paypalClient = new paypal.core.PayPalHttpClient(
+          PRODUCTION_MODE
+            ? new paypal.core.LiveEnvironment(
+                pg.paypalClientId,
+                pg.paypalClientSecret
+              )
+            : new paypal.core.SandboxEnvironment(
+                pg.paypalClientId,
+                pg.paypalClientSecret
+              )
+        );
+
+        // Create a new PayPal order with the given amount and currency
+        const request = new paypal.orders.OrdersCreateRequest();
+        request.prefer("return=representation");
+        request.requestBody({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: data.currency,
+                value: data.amount,
+              },
+            },
+          ],
+        });
+        const response = await paypalClient.execute(request);
+        const orderID = response.result.id;
+
+        return new Promise((resolve, reject) => {
+          resolve({ sessionId: orderID });
+        })
+      } catch (error) {
+        console.error(error);
+        throw new HttpException(MESSAGE.FAILED_PROCEED_API, HttpStatus.BAD_REQUEST);
+      }
+    }
+    if (data.provider == PAYMENT_METHODS.STRIPE) {
+      const stripe = new Stripe(pg.stripeSecretKey, { apiVersion: "2022-11-15" });
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Number(data.amount) * 100,
+        currency: data.currency,
+      });
+
+      return new Promise((resolve, reject) => {
+        resolve({ sessionId: paymentIntent.client_secret });
+      });
+    }
   }
 }

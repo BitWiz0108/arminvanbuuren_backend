@@ -9,6 +9,7 @@ export class OAuthSigninArgs {
   readonly provider: string;
   readonly accessToken: string;
   readonly refreshToken: string;
+  readonly appleData: any;
 }
 
 export class AuthInfo {

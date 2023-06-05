@@ -49,6 +49,16 @@ module.exports = {
         app_id: "YOUR_YOUTUBE_APP_ID",
         app_secret: "YOUR_YOUTUBE_APP_SECRET",
       },
+      {
+        provider: "GOOGLE",
+        app_id: "YOUR_GOOGLE_APP_ID",
+        app_secret: "YOUR_GOOGLE_APP_SECRET",
+      },
+      {
+        provider: "APPLE",
+        app_id: "YOUR_APPLE_APP_ID",
+        app_secret: "YOUR_APPLE_APP_SECRET",
+      },
     ], {});
   },
 

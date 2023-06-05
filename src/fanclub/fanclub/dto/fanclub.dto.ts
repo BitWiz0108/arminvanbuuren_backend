@@ -37,6 +37,7 @@ export class FanclubArtistInfoDto {
     siteTitle: string;
     siteDescription: string;
     siteSocialPreviewImage: string;
+    subscriptionDescription: string;
 }
 
 export class FanclubHighlightsDto {
@@ -107,4 +108,9 @@ export class FavoritePostDoneDto {
     constructor(msg: string) {
         this.msg = msg;
     }
+}
+
+export class PostByTitle {
+    userId: number;
+    title: string;
 }

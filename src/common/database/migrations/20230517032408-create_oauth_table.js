@@ -12,7 +12,7 @@ module.exports = {
     await queryInterface.createTable('oauth', { 
       id: { type: Sequelize.INTEGER, allowNull: false, autoIncrement: true, unique: true, primaryKey: true, },
       provider: {
-        type: Sequelize.ENUM('FACEBOOK', 'TWITTER', 'INSTAGRAM', 'AMAZON', 'GITHUB', 'LINKEDIN', 'YOUTUBE'),
+        type: Sequelize.ENUM('FACEBOOK', 'TWITTER', 'INSTAGRAM', 'AMAZON', 'GITHUB', 'LINKEDIN', 'YOUTUBE', 'GOOGLE', 'APPLE'),
       },
       app_id: { type: Sequelize.TEXT, },
       app_secret: { type: Sequelize.TEXT, },

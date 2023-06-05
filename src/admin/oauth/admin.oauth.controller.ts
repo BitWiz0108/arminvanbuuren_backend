@@ -14,8 +14,8 @@ export class AdminOAuthController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getOAuths(@Query('provider') provider: string) {
-    return this.oauthService.getOAuths(provider);
+  async getOAuths() {
+    return this.oauthService.getOAuths();
   }
 
   @Put()

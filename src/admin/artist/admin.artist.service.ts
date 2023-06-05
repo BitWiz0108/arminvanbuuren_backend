@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '@models/user.entity';
-import { AdminArtistInfoDto } from './dto/artist.dto';
+import { AdminArtistInfoDto, SubscriptionDto } from './dto/artist.dto';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BANNER_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 
@@ -109,6 +109,7 @@ export class AdminArtistService {
         siteTitle: artist.siteTitle,
         siteDescription: artist.siteDescription,
         siteSocialPreviewImage: artist.siteSocialPreviewImage,
+        subscriptionDescription: artist.subscriptionDescription,
       }
   
       return new Promise((resolve, reject) => {
@@ -120,4 +121,22 @@ export class AdminArtistService {
     
   }
 
+  async getSubscriptionDescription(artistId: number): Promise<any> {
+    const artist = await this.artistModel.findByPk(artistId);
+
+    return new Promise((resolve, reject) => {
+      resolve({ content: artist.subscriptionDescription });
+    });
+  }
+
+  async updateSubscriptionDescription(data: SubscriptionDto): Promise<any> {
+    const artist = await this.artistModel.findByPk(data.artistId);
+
+    artist.subscriptionDescription = data.content;
+    await artist.save();
+
+    return new Promise((resolve, reject) => {
+      resolve({ content: artist.subscriptionDescription });
+    });
+  }
 }

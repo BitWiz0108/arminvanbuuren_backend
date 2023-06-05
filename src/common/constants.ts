@@ -31,6 +31,8 @@ export const MESSAGE = {
   NOT_ALLOWED_MULTIPLE_DEFAULT_LANGUAGE: "There can't be 2+ default languages",
   NEED_PAYMENT_GATEWAY_INITIALIZE: "Need to initialize payment gateway",
   NEED_OAUTH_INITIALIZE: "Need to initialize oauth configuration",
+  FAILED_PROCEED_API: "Failed to call 3rd party API",
+  NOT_INCLUDE_APPLE_DATA: "Please include data from apple oauth",
 }
 
 export const PASSWORD_RESET_FORM = {
@@ -119,3 +121,17 @@ export enum HOME_DATA_TYPE {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",
 }
+
+export enum OAUTH_PROVIDER {
+  FACEBOOK = 'FACEBOOK', 
+  TWITTER = 'TWITTER', 
+  INSTAGRAM = 'INSTAGRAM', 
+  AMAZON = 'AMAZON', 
+  GITHUB = 'GITHUB', 
+  LINKEDIN = 'LINKEDIN', 
+  YOUTUBE = 'YOUTUBE', 
+  GOOGLE = 'GOOGLE', 
+  APPLE = 'APPLE',
+}
+
+export const PRODUCTION_MODE = false;

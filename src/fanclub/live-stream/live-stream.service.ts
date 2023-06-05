@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { LiveStream } from '@models/live-stream.entity';
-import { CategoriesWithLiveStreams, LiveStreamCommentOption, LiveStreamOption, LiveStreamOptionForCategory } from './dto/live-stream-option';
+import { CategoriesWithLiveStreams, LiveStreamCommentOption, LiveStreamOption, LiveStreamOptionForCategory, LivestreamByTitle } from './dto/live-stream-option';
 import { FavoriteLiveStreamDoneDto, FavoriteLiveStreamDto } from './dto/favorite.dto';
 import { Favorite } from '@models/favorite.entity';
 import { LiveStreamAllDto, LiveStreamCommentsPaginatedDto, LiveStreamWithFavorite } from './dto/live-stream.dto';
@@ -10,6 +10,8 @@ import { LiveStreamComment } from '@common/database/models/live-stream-comment.e
 import { Plan } from '@common/database/models/plan.entity';
 import { Category } from '@common/database/models/category.entity';
 import { CategoryLivestream } from '@common/database/models/category-livestream.entity';
+import { Op } from 'sequelize';
+import { MESSAGE } from '@common/constants';
 
 @Injectable()
 export class LiveStreamService {
@@ -117,6 +119,52 @@ export class LiveStreamService {
     };
 
     return data;
+  }
+
+  async findOneByTitle(data: LivestreamByTitle): Promise<LiveStream[]> {
+    const livestreams: LiveStream[] = [];
+
+    const currentLivestream = await this.livestreamModel.findOne({
+      where: {
+        title: {
+          [Op.like]: `%${data.title}%`
+        },
+      }
+    });
+    if (data.hasMemebership == false && currentLivestream.isExclusive) {
+      throw new HttpException(MESSAGE.FAILED_ACCESS_ITEM, HttpStatus.BAD_REQUEST);
+    }
+
+    let options: any = {
+      order: [[ 'createdAt', 'ASC' ]],
+    };
+
+    if (data.hasMemebership == false) {
+      options.where = {
+        isExclusive: false,
+      };
+    }
+
+    const allLivestreams = await this.livestreamModel.findAll(options);
+
+    const totalListSize = Number(await this.livestreamModel.count(options));
+
+    const currentIndex = allLivestreams.findIndex(livestream => livestream.id === currentLivestream.id );
+
+    let prevLivestream: any = null;
+    let nextLivestream: any = null;
+
+    if (totalListSize >= 3) {
+      nextLivestream = allLivestreams[(currentIndex + 1) % totalListSize];
+      prevLivestream = allLivestreams[(currentIndex - 1 + totalListSize) % totalListSize];
+    } else {
+      if (currentIndex > 0) prevLivestream = allLivestreams[currentIndex - 1];
+      if (currentIndex < totalListSize - 1) nextLivestream = allLivestreams[currentIndex + 1];
+    }
+    livestreams.push(prevLivestream);
+    livestreams.push(currentLivestream);
+    livestreams.push(nextLivestream);
+    return livestreams;
   }
 
   findOne({ livestreamId }): Promise<LiveStream> {

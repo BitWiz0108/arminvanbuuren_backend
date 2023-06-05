@@ -4,7 +4,7 @@ import { Role } from '@common-modules/auth/role.enum';
 import { Roles } from '@common-modules/auth/roles.decorator';
 import { FanclubService } from './fanclub.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { FavoritePostDto, PostOptionDto, ReplyOptionDto } from './dto/fanclub.dto';
+import { FavoritePostDto, PostByTitle, PostOptionDto, ReplyOptionDto } from './dto/fanclub.dto';
 import { Reply } from '@models/reply.entity';
 
 @ApiBearerAuth()
@@ -28,6 +28,14 @@ export class FanclubController {
       @Query('userId') userId: number
     ) {
       return this.fanclubService.getPostDetailed({ id, userId });
+    }
+
+    @Roles()
+    @Post('post/get-by-title')
+    async getPostByTitle(
+      @Body() data: PostByTitle
+    ) {
+      return this.fanclubService.getPostByTitle(data);
     }
 
     @Roles()

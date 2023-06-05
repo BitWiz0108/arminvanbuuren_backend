@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { OAuth } from '@common/database/models/oauth.entity';
-import { MESSAGE } from '@common/constants';
+import { MESSAGE, OAUTH_PROVIDER } from '@common/constants';
 
 @Injectable()
 export class AdminOAuthService {
@@ -26,18 +26,39 @@ export class AdminOAuthService {
     return await oauth.update(data);
   }
 
-  async getOAuths(provider: string): Promise<OAuth> {
-    const cnt = this.oauthModel.count();
+  async getOAuths(): Promise<any> {
+    const cnt = await this.oauthModel.count();
     if (!cnt) {
       throw new HttpException(MESSAGE.NEED_OAUTH_INITIALIZE, HttpStatus.BAD_REQUEST);
     }
 
-    const oauth = await this.oauthModel.findOne({
+    const facebookOAuth = await this.oauthModel.findOne({
       where: {
-        provider: provider
+        provider: OAUTH_PROVIDER.FACEBOOK,
       }
     });
 
-    return oauth;
+    const googleOAuth = await this.oauthModel.findOne({
+      where: {
+        provider: OAUTH_PROVIDER.GOOGLE,
+      }
+    });
+
+    const appleOAuth = await this.oauthModel.findOne({
+      where: {
+        provider: OAUTH_PROVIDER.APPLE,
+      }
+    });
+
+    const res: any = {
+      facebookAppId: facebookOAuth.appId,
+      facebookAppSecret: facebookOAuth.appSecret,
+      appleAppId: appleOAuth.appId,
+      appleAppSecret: appleOAuth.appSecret,
+      googleAppId: googleOAuth.appId,
+      googleAppSecret: googleOAuth.appSecret,
+    };
+
+    return res;
   }
 }
