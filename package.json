@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/sequelize": "^9.0.0",
     "@paypal/checkout-server-sdk": "^1.0.3",
+    "apple-signin-auth": "^1.7.5",
     "aws-sdk": "^2.1354.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
