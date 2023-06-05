@@ -57,6 +57,7 @@ export class AuthService {
           facebookId: user_info_fb.id,
           email: user_info_fb.email,
           username: user_info_fb.name,
+          roleId: ROLES.FAN
         });
         const access_token = this.jwtService.sign({ id: user.id });
         return {
@@ -85,6 +86,7 @@ export class AuthService {
           appleId: id,
           email: email,
           username: `${firstName} ${lastName}`,
+          roleId: ROLES.FAN
         });
       }
       const access_token = this.jwtService.sign({ id: user.id });
@@ -108,6 +110,7 @@ export class AuthService {
           googleId: data.sub,
           email: data.email,
           username: `${data.name}`,
+          roleId: ROLES.FAN
         });
       }
       const access_token = this.jwtService.sign({ id: user.id });
