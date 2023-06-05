@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import fetch from 'node-fetch';
+// import { fetch } from 'node-fetch';
 import { EMAIL_TEMPLATE_TYPE } from '@common/constants';
 import { EmailTemplate } from '@common/database/models/email-template.entity';
 import { ConnectionRequestInputDto } from '@fanclub/about/dto/about.dto';
