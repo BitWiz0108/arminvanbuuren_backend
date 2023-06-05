@@ -15,7 +15,6 @@ import { MESSAGE, OAUTH_PROVIDER, PASSWORD_RESET_FORM } from '@common/constants'
 import * as moment from 'moment';
 import { payment } from 'paypal-rest-sdk';
 import { OAuth } from '@common/database/models/oauth.entity';
-// import fetch from 'node-fetch';
 const fetch = require('node-fetch');
 
 const crypto = require('crypto')

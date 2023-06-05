@@ -4,6 +4,7 @@ import { EMAIL_TEMPLATE_TYPE } from '@common/constants';
 import { EmailTemplate } from '@common/database/models/email-template.entity';
 import { ConnectionRequestInputDto } from '@fanclub/about/dto/about.dto';
 import { User } from '@common/database/models/user.entity';
+const fetch = require('node-fetch');
 
 @Injectable()
 export class SendEmailService {
