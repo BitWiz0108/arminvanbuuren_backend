@@ -15,6 +15,7 @@ import { MESSAGE, OAUTH_PROVIDER, PASSWORD_RESET_FORM } from '@common/constants'
 import * as moment from 'moment';
 import { payment } from 'paypal-rest-sdk';
 import { OAuth } from '@common/database/models/oauth.entity';
+import fetch from 'node-fetch';
 
 const crypto = require('crypto')
 const appleSigninAuth = require('apple-signin-auth')
@@ -96,7 +97,7 @@ export class AuthService {
     if (oauth.provider == OAUTH_PROVIDER.GOOGLE) {
       let url = `https://oauth2.googleapis.com/tokeninfo?id_token=${signinArgs.accessToken}`
       let response = await fetch(url)
-      let data = await response.json()
+      let data: any = await response.json()
       //I'm not sure if you save this in google authmodel, if yes, replace the raw data with the db field
       // if (data.aud !== '232802954486-aioi0pt5padb447akphe9ch4un964ki4.apps.googleusercontent.com')
       if (data.aud !== oauth.appId)
