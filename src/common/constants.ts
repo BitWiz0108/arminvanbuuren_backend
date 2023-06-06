@@ -71,6 +71,8 @@ export const BUCKET_NAME = {
 export enum PAYMENT_METHODS {
   PAYPAL = "PAYPAL",
   STRIPE = "STRIPE",
+  GOOGLE = "GOOGLE",
+  APPLE = "APPLE",
 }
 
 export enum PAYMENT_STATUS {

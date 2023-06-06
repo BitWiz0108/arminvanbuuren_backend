@@ -43,7 +43,10 @@ export class LiveStreamService {
     });
 
     let options: any = {
-      order: [['releaseDate', 'DESC']],
+      order: [
+        ['releaseDate', 'DESC'],
+        ['title', 'ASC'],
+      ],
     };
 
     if (op.isExclusive != null) {
@@ -257,7 +260,10 @@ export class LiveStreamService {
 
   async findAllLiveStreamsWithCategories(op: LiveStreamOption): Promise<CategoriesWithLiveStreams[]> {
     const allCategories = await this.categoryModel.findAll({
-      order: [['releaseDate', 'DESC']],
+      order: [
+        ['releaseDate', 'DESC'],
+        ['title', 'ASC']
+      ],
       include: [
         { model: User, as: 'creator' },
         { model: LiveStream, as: 'livestreams',

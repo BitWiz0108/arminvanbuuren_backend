@@ -48,11 +48,9 @@ export class AuthService {
       const user_info_fb = await fb.api('me', { fields, access_token: signinArgs.accessToken });
 
       console.log('fb info', user_info_fb);
-      // Use Sequelize to query your database for the user with the Facebook ID returned by the `fb.api` method.
       let user = await this.authModel.findOne({ where: { facebookId: user_info_fb.id } });
 
       if (!user) {
-        // User not found, create a new user in your database.
         user = await this.authModel.create({
           facebookId: user_info_fb.id,
           email: user_info_fb.email,
@@ -68,15 +66,12 @@ export class AuthService {
     }
 
     if (oauth.provider == OAUTH_PROVIDER.APPLE) {
-      //replace the throw with your own error logic
       if(!signinArgs.appleData) throw new HttpException(MESSAGE.NOT_INCLUDE_APPLE_DATA, HttpStatus.BAD_REQUEST);
 
       let {nonce, id, email, firstName, lastName, identityToken } = signinArgs.appleData
       let appleIdTokenClaims = await appleSigninAuth.verifyIdToken(identityToken, {
-        /* sha256 hex hash of raw nonce */
         nonce: nonce ? crypto.createHash('sha256').update(nonce).digest('hex') : undefined,
       });
-      // if (!appleIdTokenClaims || appleIdTokenClaims.aud != 'com.app.ArminVanBuuren')
       if (!appleIdTokenClaims || appleIdTokenClaims.aud != oauth.appId)
         throw new HttpException(MESSAGE.INVALID_TOKEN, HttpStatus.BAD_REQUEST);
       
@@ -100,8 +95,6 @@ export class AuthService {
       let url = `https://oauth2.googleapis.com/tokeninfo?id_token=${signinArgs.accessToken}`
       let response = await fetch(url)
       let data: any = await response.json()
-      //I'm not sure if you save this in google authmodel, if yes, replace the raw data with the db field
-      // if (data.aud !== '232802954486-aioi0pt5padb447akphe9ch4un964ki4.apps.googleusercontent.com')
       if (data.aud !== oauth.appId)
         throw new HttpException(MESSAGE.INVALID_TOKEN, HttpStatus.BAD_REQUEST);
       let user = await this.authModel.findOne({ where: { googleId: data.sub } });
