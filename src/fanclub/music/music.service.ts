@@ -66,6 +66,7 @@ export class MusicService {
         isExclusive: item.isExclusive,
         isFavorite: iLikeIt > 0,
         singer: item.singer,
+        releaseDate: item.releaseDate,
       };
       
       return music;
@@ -137,6 +138,7 @@ export class MusicService {
           isExclusive: item.isExclusive,
           isFavorite: iLikeThis > 0,
           singer: item.singer,
+          releaseDate: item.releaseDate,
         };
 
         return music;
@@ -204,6 +206,7 @@ export class MusicService {
         isExclusive: item.isExclusive,
         isFavorite: iLikeThis > 0,
         singer: item.singer,
+        releaseDate: item.releaseDate,
       };
       
       return music;

@@ -17,6 +17,7 @@ export class MusicWithFavorite {
   isExclusive: boolean;
   isFavorite: boolean;
   singer: User;
+  releaseDate: string;
 }
 
 export class AlbumsWithMusics {
