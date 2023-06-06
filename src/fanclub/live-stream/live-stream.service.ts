@@ -277,7 +277,12 @@ export class LiveStreamService {
     const categoryPromises = allCategories.map(async (category) => {
       category.livestreams.sort((a: LiveStream, b: LiveStream) => {
         if (b.releaseDate > a.releaseDate) return 1;
-        else return 0;
+        else if (b.releaseDate < a.releaseDate) return -1;
+        else {
+          if (a.title > b.title) return 1;
+          else if (a.title < b.title) return -1;
+          else return 0;
+        }
       });
 
       const size = await this.categoryLivestreamModel.count({
@@ -329,7 +334,12 @@ export class LiveStreamService {
 
     category.livestreams.sort((a: LiveStream, b: LiveStream) => {
       if (b.releaseDate > a.releaseDate) return 1;
-      else return 0;
+      else if (b.releaseDate < a.releaseDate) return -1;
+      else {
+        if (a.title > b.title) return 1;
+        else if (a.title < b.title) return -1;
+        else return 0;
+      }
     });
 
     const livestreams = category.livestreams.slice((op.page - 1) * op.limit, op.page * op.limit);

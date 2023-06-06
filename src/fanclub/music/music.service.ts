@@ -89,10 +89,6 @@ export class MusicService {
       include: [
         { model: User, as: 'creator' },
         { model: Music, as: 'musics',
-          order: [
-            ['releaseDate', 'DESC'],
-            ['title', 'ASC']
-          ],
           include: [
             { model: User, as: 'singer' }
           ]
@@ -103,7 +99,12 @@ export class MusicService {
     const albumPromises = allAlbums.map(async (album) => {
       album.musics.sort((a: Music, b: Music) => {
         if (b.releaseDate > a.releaseDate) return 1;
-        else return 0;
+        else if (b.releaseDate < a.releaseDate) return -1;
+        else {
+          if (a.title > b.title) return 1;
+          else if (a.title < b.title) return -1;
+          else return 0;
+        }
       });
   
       const size = await this.albumMusicModel.count({
@@ -181,7 +182,12 @@ export class MusicService {
 
     album.musics.sort((a: Music, b: Music) => {
       if (b.releaseDate > a.releaseDate) return 1;
-      else return 0;
+      else if (b.releaseDate < a.releaseDate) return -1;
+      else {
+        if (a.title > b.title) return 1;
+        else if (a.title < b.title) return -1;
+        else return 0;
+      }
     });
 
     const items = album.musics.slice((op.page - 1) * op.limit, op.page * op.limit);
