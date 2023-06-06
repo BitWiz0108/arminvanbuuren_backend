@@ -262,7 +262,6 @@ export class LiveStreamService {
     const allCategories = await this.categoryModel.findAll({
       order: [
         ['releaseDate', 'DESC'],
-        ['title', 'ASC']
       ],
       include: [
         { model: User, as: 'creator' },

@@ -84,7 +84,6 @@ export class MusicService {
     const allAlbums = await this.albumModel.findAll({
       order: [
         ['releaseDate', 'DESC'],
-        ['title', 'ASC']
       ],
       include: [
         { model: User, as: 'creator' },
