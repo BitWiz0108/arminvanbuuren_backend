@@ -88,6 +88,10 @@ export class MusicService {
       include: [
         { model: User, as: 'creator' },
         { model: Music, as: 'musics',
+          order: [
+            ['releaseDate', 'DESC'],
+            ['title', 'ASC']
+          ],
           include: [
             { model: User, as: 'singer' }
           ]
