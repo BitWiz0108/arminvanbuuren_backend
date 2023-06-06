@@ -82,7 +82,10 @@ export class MusicService {
 
   async findAllMusicsWithAlbums(op: MusicOption): Promise<AlbumsWithMusics[]> {
     const allAlbums = await this.albumModel.findAll({
-      order: [['releaseDate', 'DESC']],
+      order: [
+        ['releaseDate', 'DESC'],
+        ['title', 'ASC']
+      ],
       include: [
         { model: User, as: 'creator' },
         { model: Music, as: 'musics',
