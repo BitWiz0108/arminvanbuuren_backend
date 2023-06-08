@@ -76,11 +76,14 @@ export class AuthService {
         throw new HttpException(MESSAGE.INVALID_TOKEN, HttpStatus.BAD_REQUEST);
       
       let user = await this.authModel.findOne({ where: { appleId: id } });
+      
       if(!user) {
         user = await this.authModel.create({
           appleId: id,
           email: email,
-          username: `${firstName} ${lastName}`,
+          username: email,
+          firstName: firstName,
+          lastName: lastName,
           roleId: ROLES.FAN
         });
       }
@@ -93,8 +96,9 @@ export class AuthService {
 
     if (oauth.provider == OAUTH_PROVIDER.GOOGLE) {
       let url = `https://oauth2.googleapis.com/tokeninfo?id_token=${signinArgs.accessToken}`
-      let response = await fetch(url)
-      let data: any = await response.json()
+      let response = await fetch(url);
+      let data: any = await response.json();
+      console.log('google oauth data', data);
       if (data.aud !== oauth.appId)
         throw new HttpException(MESSAGE.INVALID_TOKEN, HttpStatus.BAD_REQUEST);
       let user = await this.authModel.findOne({ where: { googleId: data.sub } });
@@ -102,7 +106,9 @@ export class AuthService {
         user = await this.authModel.create({
           googleId: data.sub,
           email: data.email,
-          username: `${data.name}`,
+          username: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
           roleId: ROLES.FAN
         });
       }
