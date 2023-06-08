@@ -107,8 +107,8 @@ export class AuthService {
           googleId: data.sub,
           email: data.email,
           username: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
+          firstName: data.given_name,
+          lastName: data.family_name,
           roleId: ROLES.FAN
         });
       }
