@@ -68,7 +68,6 @@ export class AuthService {
       if(!signinArgs.appleData) throw new HttpException(MESSAGE.NOT_INCLUDE_APPLE_DATA, HttpStatus.BAD_REQUEST);
 
       let {nonce, id, email, firstName, lastName, identityToken } = signinArgs.appleData
-      console.log('apple oauth data', signinArgs.appleData);
       let appleIdTokenClaims = await appleSigninAuth.verifyIdToken(identityToken, {
         nonce: nonce ? crypto.createHash('sha256').update(nonce).digest('hex') : undefined,
       });
@@ -98,7 +97,6 @@ export class AuthService {
       let url = `https://oauth2.googleapis.com/tokeninfo?id_token=${signinArgs.accessToken}`
       let response = await fetch(url);
       let data: any = await response.json();
-      console.log('google oauth data', data);
       if (data.aud !== oauth.appId)
         throw new HttpException(MESSAGE.INVALID_TOKEN, HttpStatus.BAD_REQUEST);
       let user = await this.authModel.findOne({ where: { googleId: data.sub } });
