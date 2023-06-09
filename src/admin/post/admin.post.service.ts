@@ -89,55 +89,57 @@ export class AdminPostService {
     const ids = data.ids.split(",");
     const types = data.types.split(",");
 
-    for (let i = 0; i < ids.length; i ++) {
-      const postFileId = ids[i];
-
-      if (postFileId) { // update file
-        const postFile = await this.postFileModel.findByPk(postFileId);
-
-        if (types[i] == '' || types[i] == undefined || types[i] == null) {
-          await postFile.destroy();
-          continue;
-        }
+    if (files.length > 0) {
+      for (let i = 0; i < ids.length; i ++) {
+        const postFileId = ids[i];
   
-        if (types[i] == POST_FILE_TYPE.IMAGE) {
-          postFile.type = POST_FILE_TYPE.IMAGE;
-          postFile.file = await this.uploadService.uploadFileToBucket(files[i * 2], ASSET_TYPE.IMAGE, false, this.bucketOption);
-          postFile.fileCompressed = await this.uploadService.uploadFileToBucket(files[i * 2 + 1], ASSET_TYPE.IMAGE, false, this.bucketOption);
-        }
+        if (postFileId) { // update file
+          const postFile = await this.postFileModel.findByPk(postFileId);
   
-        if (types[i] == POST_FILE_TYPE.VIDEO) {
-          postFile.type = POST_FILE_TYPE.VIDEO;
-          postFile.file = await this.uploadService.uploadFileToBucket(files[i * 2], ASSET_TYPE.VIDEO, false, this.bucketOption);
-          postFile.fileCompressed = await this.uploadService.uploadFileToBucket(files[i * 2 + 1], ASSET_TYPE.VIDEO, false, this.bucketOption);
-        }
+          if (types[i] == '' || types[i] == undefined || types[i] == null) {
+            await postFile.destroy();
+            continue;
+          }
+    
+          if (types[i] == POST_FILE_TYPE.IMAGE) {
+            postFile.type = POST_FILE_TYPE.IMAGE;
+            postFile.file = await this.uploadService.uploadFileToBucket(files[i * 2], ASSET_TYPE.IMAGE, false, this.bucketOption);
+            postFile.fileCompressed = await this.uploadService.uploadFileToBucket(files[i * 2 + 1], ASSET_TYPE.IMAGE, false, this.bucketOption);
+          }
+    
+          if (types[i] == POST_FILE_TYPE.VIDEO) {
+            postFile.type = POST_FILE_TYPE.VIDEO;
+            postFile.file = await this.uploadService.uploadFileToBucket(files[i * 2], ASSET_TYPE.VIDEO, false, this.bucketOption);
+            postFile.fileCompressed = await this.uploadService.uploadFileToBucket(files[i * 2 + 1], ASSET_TYPE.VIDEO, false, this.bucketOption);
+          }
+    
+          await postFile.save();
   
-        await postFile.save();
-
-      } else { // add new file
-        let row: any = {};
-        row.type = types[i];
-
-        if (types[i] == POST_FILE_TYPE.IMAGE) {
-          if (files[i * 2]?.size)
-            row.file = await this.uploadService.uploadFileToBucket(files[i * 2], ASSET_TYPE.IMAGE, false, this.bucketOption);
-          if (files[i * 2 + 1]?.size)
-            row.fileCompressed = await this.uploadService.uploadFileToBucket(files[i * 2 + 1], ASSET_TYPE.IMAGE, false, this.bucketOption);
-        }
+        } else { // add new file
+          let row: any = {};
+          row.type = types[i];
   
-        if (types[i] == POST_FILE_TYPE.VIDEO) {
-          if (files[i * 2]?.size)
-            row.file = await this.uploadService.uploadFileToBucket(files[i * 2], ASSET_TYPE.VIDEO, false, this.bucketOption);
-          if (files[i * 2 + 1]?.size)
-            row.fileCompressed = await this.uploadService.uploadFileToBucket(files[i * 2 + 1], ASSET_TYPE.VIDEO, false, this.bucketOption);
+          if (types[i] == POST_FILE_TYPE.IMAGE) {
+            if (files[i * 2]?.size)
+              row.file = await this.uploadService.uploadFileToBucket(files[i * 2], ASSET_TYPE.IMAGE, false, this.bucketOption);
+            if (files[i * 2 + 1]?.size)
+              row.fileCompressed = await this.uploadService.uploadFileToBucket(files[i * 2 + 1], ASSET_TYPE.IMAGE, false, this.bucketOption);
+          }
+    
+          if (types[i] == POST_FILE_TYPE.VIDEO) {
+            if (files[i * 2]?.size)
+              row.file = await this.uploadService.uploadFileToBucket(files[i * 2], ASSET_TYPE.VIDEO, false, this.bucketOption);
+            if (files[i * 2 + 1]?.size)
+              row.fileCompressed = await this.uploadService.uploadFileToBucket(files[i * 2 + 1], ASSET_TYPE.VIDEO, false, this.bucketOption);
+          }
+    
+          await this.postFileModel.create({
+            postId: data.id,
+            type: row.type,
+            file: row.file,
+            fileCompressed: row.fileCompressed,
+          });
         }
-  
-        await this.postFileModel.create({
-          postId: data.id,
-          type: row.type,
-          file: row.file,
-          fileCompressed: row.fileCompressed,
-        });
       }
     }
 
