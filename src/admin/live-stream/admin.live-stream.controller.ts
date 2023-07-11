@@ -23,13 +23,15 @@ export class AdminLiveStreamController {
       @Query('title') title: string,
       @Query('releaseDate') releaseDate: string,
       @Query('artistName') artistName: string,
+      @Query('searchKey') searchKey: string,
     ) {
       return this.livestreamService.findAll({
         page,
         limit,
         title,
         releaseDate,
-        artistName
+        artistName,
+        searchKey,
       });
     }
 

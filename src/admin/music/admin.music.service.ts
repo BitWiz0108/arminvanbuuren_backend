@@ -7,10 +7,10 @@ import { Album } from '@models/album.entity';
 import { MusicGenre } from '@common/database/models/music-genre.entity';
 import { Language } from '@models/language.entity';
 import { AdminMusicDto, MusicWithAlbumIds } from './dto/music.dto';
-import * as sharp from 'sharp';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 import { AlbumMusic } from '@common/database/models/album-music.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class AdminMusicService {
@@ -47,17 +47,36 @@ export class AdminMusicService {
     const musicFile: Express.Multer.File = files[0];
     const musicCompressedFile: Express.Multer.File = files[1];
     const coverImageFile: Express.Multer.File = files[2];
+    const videoBackgroundFile: Express.Multer.File = files[3];
+    const videoBackgroundFileCompressed: Express.Multer.File = files[4];
 
-    const coverImageUrl = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
+    if (musicFile?.size) { // if musicFile exists
+      data.musicFile = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
+    }
 
-    const musicFileUrl = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
-    const musicFileCompressedUrl = await this.uploadService.uploadFileToBucket(musicCompressedFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
+    if (musicCompressedFile?.size) { // if musicFile exists
+      data.musicFileCompressed = await this.uploadService.uploadFileToBucket(musicCompressedFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
+    }
+
+    if (coverImageFile?.size) { // if imageFile exists
+      data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
+    }
+
+    if (videoBackgroundFile?.size) { // if videoBackgroundFile exists
+      data.videoBackground = await this.uploadService.uploadFileToBucket(videoBackgroundFile, ASSET_TYPE.VIDEO, false, this.bucketPublicOption);
+    }
+
+    if (videoBackgroundFileCompressed?.size) { // if videoBackgroundFileCompressed exists
+      data.videoBackgroundCompressed = await this.uploadService.uploadFileToBucket(videoBackgroundFileCompressed, ASSET_TYPE.VIDEO, false, this.bucketPublicOption);
+    }
 
     const newMusicItem: Music = await this.musicModel.create({
       userId: data.userId,
-      coverImage: coverImageUrl,
-      musicFile: musicFileUrl,
-      musicFileCompressed: musicFileCompressedUrl,
+      coverImage: data.coverImage,
+      musicFile: data.musicFile,
+      musicFileCompressed: data.musicFileCompressed,
+      videoBackground: data.videoBackground,
+      videoBackgroundCompressed: data.videoBackgroundCompressed,
       isExclusive: data.isExclusive,
       duration: data.duration,
       title: data.title,
@@ -123,6 +142,8 @@ export class AdminMusicService {
     const musicFile: Express.Multer.File = files[0];
     const musicCompressedFile: Express.Multer.File = files[1];
     const coverImageFile: Express.Multer.File = files[2];
+    const videoBackgroundFile: Express.Multer.File = files[3];
+    const videoBackgroundFileCompressed: Express.Multer.File = files[4];
 
     if (musicFile?.size) { // if musicFile exists
       data.musicFile = await this.uploadService.uploadFileToBucket(musicFile, ASSET_TYPE.MUSIC, false, this.bucketOption);
@@ -134,6 +155,14 @@ export class AdminMusicService {
 
     if (coverImageFile?.size) { // if imageFile exists
       data.coverImage = await this.uploadService.uploadFileToBucket(coverImageFile, ASSET_TYPE.IMAGE, false, this.bucketPublicOption);
+    }
+
+    if (videoBackgroundFile?.size) { // if videoBackgroundFile exists
+      data.videoBackground = await this.uploadService.uploadFileToBucket(videoBackgroundFile, ASSET_TYPE.VIDEO, false, this.bucketPublicOption);
+    }
+
+    if (videoBackgroundFileCompressed?.size) { // if videoBackgroundFileCompressed exists
+      data.videoBackgroundCompressed = await this.uploadService.uploadFileToBucket(videoBackgroundFileCompressed, ASSET_TYPE.VIDEO, false, this.bucketPublicOption);
     }
 
     await item.update(data);
@@ -179,10 +208,26 @@ export class AdminMusicService {
       orders.push(['releaseDate', 'DESC']);
     }
 
-    const filteredMusics: Music[] = await this.musicModel.findAll({ 
-      offset: (page - 1) * limit, 
+    let options: any = {};
+    if (op.searchKey) {
+      options = {
+        order: orders,
+        where: {
+          title: {
+            [Op.like]: `%${op.searchKey}%`
+          }
+        }
+      };
+    } else {
+      options = {
+        order: orders,
+      };
+    }
+
+    const filteredMusics: Music[] = await this.musicModel.findAll({
+      offset: (page - 1) * limit,
       limit: limit,
-      order: orders,
+      ...options,
       include: [
         { model: Album, as: 'albums' },
         { model: MusicGenre, as: 'musicGenre' },
@@ -198,6 +243,8 @@ export class AdminMusicService {
         coverImage: filteredMusic.coverImage,
         musicFile: filteredMusic.musicFile,
         musicFileCompressed: filteredMusic.musicFileCompressed,
+        videoBackground: filteredMusic.videoBackground,
+        videoBackgroundCompressed: filteredMusic.videoBackgroundCompressed,
         isExclusive: filteredMusic.isExclusive,
         albums: filteredMusic.albums,
         albumIds: filteredMusic.albumIds,

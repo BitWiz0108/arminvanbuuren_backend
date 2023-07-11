@@ -1,4 +1,4 @@
-import { Controller, Param, Body, Get, Post, Query, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import { Controller, Param, Body, Get, Post, Query, HttpCode, HttpStatus, Req, Delete, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@common-modules/auth/role.enum';
 import { Roles } from '@common-modules/auth/roles.decorator';
@@ -65,5 +65,19 @@ export class LiveStreamController {
   @HttpCode(HttpStatus.OK)
   async findAllLivestreamsForCategory(@Body() data: LiveStreamOptionForCategory) {
     return this.livestreamService.findAllLivestreamsForCategory(data);
+  }
+
+  @Roles()
+  @Delete()
+  @HttpCode(HttpStatus.ACCEPTED)
+  async deleteComment(@Query('id') commentId: number, @Query('userId') userId: number) {
+    await this.livestreamService.removeComment(commentId, userId);
+  }
+
+  @Roles()
+  @Put('comment')
+  @HttpCode(HttpStatus.ACCEPTED)
+  async updateComment(@Body() data: Partial<LiveStreamComment>) {
+    return this.livestreamService.updateComment(data);
   }
 }

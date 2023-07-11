@@ -9,7 +9,7 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.createTable('home', { 
+    await queryInterface.createTable('home', {
       id: { type: Sequelize.INTEGER, allowNull: false, autoIncrement: true, unique: true, primaryKey: true, },
       type: {
         type: Sequelize.ENUM('VIDEO', 'IMAGE'),

@@ -33,6 +33,18 @@ export class Home extends Model {
   @Column({ field: 'background_video_compressed' })
   backgroundVideoCompressed: string;
 
+  @Column({ field: 'signin_background_video' })
+  signInBackgroundVideo: string;
+
+  @Column({ field: 'signin_background_video_compressed' })
+  signInBackgroundVideoCompressed: string;
+
+  @Column({ field: 'signin_background_image' })
+  signInBackgroundImage: string;
+
+  @Column({ field: 'signin_background_image_compressed' })
+  signInBackgroundImageCompressed: string;
+
   @Column({ field: 'youtube_video_url' })
   youtubeVideoUrl: string;
 

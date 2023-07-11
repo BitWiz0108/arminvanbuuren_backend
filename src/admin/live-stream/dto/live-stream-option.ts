@@ -4,6 +4,7 @@ export class AdminLiveStreamOption {
   readonly title: string;
   readonly releaseDate: string;
   readonly artistName: string;
+  readonly searchKey: string;
 }
 
 export class LiveStreamInputArg {

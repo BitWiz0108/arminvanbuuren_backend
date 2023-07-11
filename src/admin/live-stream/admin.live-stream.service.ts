@@ -8,7 +8,7 @@ import { Language } from '@models/language.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 import { LiveStreamComment } from '@common/database/models/live-stream-comment.entity';
-import { Identifier } from 'sequelize';
+import { Identifier, Op } from 'sequelize';
 import { Category } from '@common/database/models/category.entity';
 import { CategoryLivestream } from '@common/database/models/category-livestream.entity';
 
@@ -209,10 +209,27 @@ export class AdminLiveStreamService {
       orders.push(['releaseDate', 'DESC']);
     }
 
+    let options: any = {};
+    if (op.searchKey) {
+      options = {
+        order: orders,
+        where: {
+          title: {
+            [Op.like]: `%${op.searchKey}%`
+          }
+        }
+      };
+    } else {
+      options = {
+        order: orders,
+      };
+    }
+
     const filteredLivestreams: LiveStream[] = await this.livestreamModel.findAll({ 
       offset: (page - 1) * limit,
       limit: limit,
       order: orders,
+      ...options,
       include: [
         { model: User, as: 'singer' },
         { model: User, as: 'creator' },

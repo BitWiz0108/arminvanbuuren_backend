@@ -23,15 +23,16 @@ export class AdminMusicController {
       @Query('title') title: string,
       @Query('releaseDate') releaseDate: string,
       @Query('artistName') artistName: string,
+      @Query('searchKey') searchKey: string,
     ) {
-      return this.musicService.findAll({page, limit, title, releaseDate, artistName});
+      return this.musicService.findAll({page, limit, title, releaseDate, artistName, searchKey});
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @UseInterceptors(FilesInterceptor('files'))
     async add(
-      @Body() data: MusicInputArg, 
+      @Body() data: MusicInputArg,
       @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
       const result = await this.musicService.add(data, files);

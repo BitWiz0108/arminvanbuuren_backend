@@ -5,6 +5,7 @@ import { User } from '@models/user.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 import { AlbumMusic } from '@common/database/models/album-music.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class AdminAlbumService {
@@ -26,12 +27,28 @@ export class AdminAlbumService {
     };
   }
 
-  async add(data: Partial<Album>, imageFile: Express.Multer.File): Promise<Album> {
+  async add(data: Partial<Album>, files: Express.Multer.File[]): Promise<Album> {
     try {
-      data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+      const imageFile: Express.Multer.File = files[0];
+      const videoFile: Express.Multer.File = files[1];
+      const videoFileCompressed: Express.Multer.File = files[2];
+
+      if (imageFile?.size) {
+        data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+      }
+
+      if (videoFile?.size) {
+        data.videoBackground = await this.uploadService.uploadFileToBucket(videoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+      }
+
+      if (videoFileCompressed?.size) {
+        data.videoBackgroundCompressed = await this.uploadService.uploadFileToBucket(videoFileCompressed, ASSET_TYPE.VIDEO, false, this.bucketOption);
+      }
       
       const newAlbumItem: Album = await this.albumModel.create({
         image: data.image, // use the CloudFront full file path as the `image` column value
+        videoBackground: data.videoBackground,
+        videoBackgroundCompressed: data.videoBackgroundCompressed,
         name: data.name,
         userId: data.userId,
         description: data.description,
@@ -53,15 +70,27 @@ export class AdminAlbumService {
 
   async update(
     data: Partial<Album>,
-    file: Express.Multer.File
+    files: Express.Multer.File[]
   ): Promise<Album> {
     const item = await this.albumModel.findByPk(data.id);
     if (!item) {
       throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
     }
     
-    if (file) {
-      data.image = await this.uploadService.uploadFileToBucket(file, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    const imageFile: Express.Multer.File = files[0];
+    const videoFile: Express.Multer.File = files[1];
+    const videoFileCompressed: Express.Multer.File = files[2];
+
+    if (imageFile?.size) {
+      data.image = await this.uploadService.uploadFileToBucket(imageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+
+    if (videoFile?.size) {
+      data.videoBackground = await this.uploadService.uploadFileToBucket(videoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+
+    if (videoFileCompressed?.size) {
+      data.videoBackgroundCompressed = await this.uploadService.uploadFileToBucket(videoFileCompressed, ASSET_TYPE.VIDEO, false, this.bucketOption);
     }
     
     await item.update(data);
@@ -73,9 +102,20 @@ export class AdminAlbumService {
     });
   }
 
-  async findAll(): Promise<Album[]> {
+  async findAll(op: any): Promise<Album[]> {
+    let options: any = {};
+    if (op.searchKey) {
+      options = {
+        where: {
+          title: {
+            [Op.like]: `%${op.searchKey}%`
+          }
+        }
+      };
+    }
     return this.albumModel.findAll({
       order: [['releaseDate', 'DESC']],
+      ...options,
       include: [{ model: User, as: 'creator' }],
     });
   }

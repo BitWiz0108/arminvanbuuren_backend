@@ -39,11 +39,12 @@ export class MusicService {
 
     let data: MusicAllDto;
     const items = await this.musicModel.findAll({ 
-      offset: (op.page - 1) * op.limit, 
+      offset: (op.page - 1) * op.limit,
       limit: op.limit,
       ...options,
       include: [
         { model: User, as: 'singer' },
+        { model: Album, as: 'albums' },
       ]
     });
     const promises = items.map(async item => {
@@ -54,11 +55,28 @@ export class MusicService {
         }
       });
 
+      let videoBackground = item.videoBackground ? item.videoBackground : null;
+      let videoBackgroundCompressed = item.videoBackgroundCompressed ? item.videoBackgroundCompressed : null;
+      
+      if (videoBackground == null) {
+        if (item.albums.length > 0) for (let i = 0; i < item.albums.length; i ++) {
+          if (item.albums[i].videoBackground != null) videoBackground = item.albums[i].videoBackground;
+        }
+      }
+      
+      if (videoBackgroundCompressed == null) {
+        if (item.albums.length > 0) for (let i = 0; i < item.albums.length; i ++) {
+          if (item.albums[i].videoBackgroundCompressed != null) videoBackgroundCompressed = item.albums[i].videoBackgroundCompressed;
+        }
+      }
+
       const music: MusicWithFavorite = {
         id: item.id,
         coverImage: item.coverImage,
         musicFile: item.musicFile,
         musicFileCompressed: item.musicFileCompressed,
+        videoBackground: item.videoBackground,
+        videoBackgroundCompressed: item.videoBackgroundCompressed,
         title: item.title,
         duration: item.duration,
         lyrics: item.lyrics,
@@ -132,6 +150,8 @@ export class MusicService {
           coverImage: item.coverImage,
           musicFile: item.musicFile,
           musicFileCompressed: item.musicFileCompressed,
+          videoBackground: item.videoBackground ? item.videoBackground : album.videoBackground,
+          videoBackgroundCompressed: item.videoBackgroundCompressed ? item.videoBackgroundCompressed : album.videoBackgroundCompressed,
           title: item.title,
           duration: item.duration,
           lyrics: item.lyrics,
@@ -148,6 +168,8 @@ export class MusicService {
 
       const alb = {
         id: album.id,
+        videoBackground: album.videoBackground,
+        videoBackgroundCompressed: album.videoBackgroundCompressed,
         name: album.name,
         creator: album.creator,
         description: album.description,
@@ -205,6 +227,8 @@ export class MusicService {
         coverImage: item.coverImage,
         musicFile: item.musicFile,
         musicFileCompressed: item.musicFileCompressed,
+        videoBackground: item.videoBackground ? item.videoBackground : album.videoBackground,
+        videoBackgroundCompressed: item.videoBackgroundCompressed ? item.videoBackgroundCompressed : album.videoBackgroundCompressed,
         title: item.title,
         duration: item.duration,
         lyrics: item.lyrics,

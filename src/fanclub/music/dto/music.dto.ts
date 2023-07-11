@@ -10,6 +10,8 @@ export class MusicWithFavorite {
   coverImage: string;
   musicFile: string;
   musicFileCompressed: string;
+  videoBackground: string;
+  videoBackgroundCompressed: string;
   title: string;
   duration: number;
   lyrics: string;

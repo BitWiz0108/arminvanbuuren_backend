@@ -40,6 +40,12 @@ export class AdminHomeService {
     const backgroundVideoFile: Express.Multer.File = data.type == HOME_DATA_TYPE.VIDEO ? files[0] : null;
     const backgroundVideoCompressedFile: Express.Multer.File = data.type == HOME_DATA_TYPE.VIDEO ? files[1] : null;
 
+    const signInBackgroundVideoFile: Express.Multer.File = data.type == HOME_DATA_TYPE.VIDEO ? files[2] : null;
+    const signInBackgroundVideoCompressedFile: Express.Multer.File = data.type == HOME_DATA_TYPE.VIDEO ? files[3] : null;
+
+    const signInBackgroundImageFile: Express.Multer.File = data.type == HOME_DATA_TYPE.IMAGE ? files[2] : null;
+    const signInBackgroundImageCompressedFile: Express.Multer.File = data.type == HOME_DATA_TYPE.IMAGE ? files[3] : null;
+
     if (backgroundImageFile?.size) {
       data.backgroundImage = await this.uploadService.uploadFileToBucket(backgroundImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
@@ -54,6 +60,22 @@ export class AdminHomeService {
 
     if (backgroundVideoCompressedFile?.size) {
       data.backgroundVideoCompressed = await this.uploadService.uploadFileToBucket(backgroundVideoCompressedFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+
+    if (signInBackgroundVideoFile?.size) {
+      data.signInBackgroundVideo = await this.uploadService.uploadFileToBucket(signInBackgroundVideoFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+
+    if (signInBackgroundVideoCompressedFile?.size) {
+      data.signInBackgroundVideoCompressed = await this.uploadService.uploadFileToBucket(signInBackgroundVideoCompressedFile, ASSET_TYPE.VIDEO, false, this.bucketOption);
+    }
+
+    if (signInBackgroundImageFile?.size) {
+      data.signInBackgroundImage = await this.uploadService.uploadFileToBucket(signInBackgroundImageFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
+    }
+
+    if (signInBackgroundImageCompressedFile?.size) {
+      data.signInBackgroundImageCompressed = await this.uploadService.uploadFileToBucket(signInBackgroundImageCompressedFile, ASSET_TYPE.IMAGE, false, this.bucketOption);
     }
 
     return await item.update(data);

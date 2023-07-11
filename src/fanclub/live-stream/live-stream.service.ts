@@ -258,6 +258,17 @@ export class LiveStreamService {
     return newItem;
   }
 
+  async updateComment(data: Partial<LiveStreamComment>): Promise<LiveStreamComment> {
+    const item = await this.commentModel.findByPk(data.id);
+
+    if (item.livestreamId != data.livestreamId || item.userId != data.userId) {
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.FORBIDDEN);
+    }
+
+    await item.update(data);
+    return item;
+  }
+
   async findAllLiveStreamsWithCategories(op: LiveStreamOption): Promise<CategoriesWithLiveStreams[]> {
     const allCategories = await this.categoryModel.findAll({
       order: [
@@ -345,5 +356,18 @@ export class LiveStreamService {
     const livestreams = category.livestreams.slice((op.page - 1) * op.limit, op.page * op.limit);
 
     return livestreams;
+  }
+
+  async removeComment(commentId: number, userId: number): Promise<void> {
+    const item = await this.commentModel.findByPk(commentId);
+    if (!item) {
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.BAD_REQUEST);
+    }
+
+    if (item.userId != userId) {
+      throw new HttpException(MESSAGE.FAILED_LOAD_ITEM, HttpStatus.FORBIDDEN);
+    }
+
+    await item.destroy();
   }
 }

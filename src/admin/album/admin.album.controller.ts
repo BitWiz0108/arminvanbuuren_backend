@@ -1,9 +1,9 @@
-import { Controller, Param, Body, Get, Post, UseGuards, Put, Delete, Query, HttpCode, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Param, Body, Get, Post, UseGuards, Put, Delete, Query, HttpCode, HttpStatus, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AdminAlbumService } from './admin.album.service';
 import { AdminGuard } from '@admin/admin.guard';
 import { Album } from '@models/album.entity';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiBearerAuth()
 @ApiTags('Admin Album')
@@ -14,26 +14,28 @@ export class AdminAlbumController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    async findAll() {
-      return this.albumService.findAll();
+    async findAll(
+      @Query('searchKey') searchKey: string
+    ) {
+      return this.albumService.findAll({ searchKey });
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @UseInterceptors(FileInterceptor('imageFile'))
-    async add(@Body() data: Partial<Album>, @UploadedFile() imageFile: Express.Multer.File) {
-      const result = await this.albumService.add(data, imageFile);
+    @UseInterceptors(FilesInterceptor('files'))
+    async add(@Body() data: Partial<Album>, @UploadedFiles() files: Array<Express.Multer.File>,) {
+      const result = await this.albumService.add(data, files);
       return result;
     }
 
     @Put()
     @HttpCode(HttpStatus.ACCEPTED)
-    @UseInterceptors(FileInterceptor('imageFile'))
+    @UseInterceptors(FilesInterceptor('files'))
     async update(
       @Body() data: Partial<Album>,
-      @UploadedFile() file: Express.Multer.File,
+      @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
-      const album = await this.albumService.update(data, file);
+      const album = await this.albumService.update(data, files);
       return album;
     }
 

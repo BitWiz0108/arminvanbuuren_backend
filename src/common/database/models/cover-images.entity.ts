@@ -20,4 +20,7 @@ export class CoverImage extends Model {
   
   @Column({ field: 'cover_image_2' })
   coverImage2: string;
+
+  @Column
+  content: string;
 }

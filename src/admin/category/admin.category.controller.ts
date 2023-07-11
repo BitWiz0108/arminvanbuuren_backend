@@ -14,8 +14,10 @@ export class AdminCategoryController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    async findAll() {
-      return this.categoryService.findAll();
+    async findAll(
+      @Query('searchKey') searchKey: string
+    ) {
+      return this.categoryService.findAll({ searchKey });
     }
 
     @Post()

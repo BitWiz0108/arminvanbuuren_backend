@@ -34,6 +34,12 @@ export class Music extends Model {
   @Column({ field: 'music_file_compressed' })
   musicFileCompressed: string;
 
+  @Column({ field: 'video_background' })
+  videoBackground: string;
+
+  @Column({ field: 'video_background_compressed' })
+  videoBackgroundCompressed: string;
+
   @Column({ field: 'download_price' })
   downloadPrice: number;
 

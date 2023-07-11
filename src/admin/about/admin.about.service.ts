@@ -21,7 +21,7 @@ export class AdminAboutService {
     };
   }
 
-  async loadCoverImages() {
+  async getAboutData() {
     return await this.aboutModel.findOne();
   }
 
@@ -45,5 +45,21 @@ export class AdminAboutService {
     }
 
     return await item.save();
+  }
+
+  async updateAboutText(data: any) : Promise<any> {
+    const content = data.content;
+    const item = await this.aboutModel.findOne();
+    if (!item) {
+      throw new HttpException(MESSAGE.FAILED_TO_FETCH_TOS_DATA, HttpStatus.BAD_REQUEST);
+    }
+
+    item.content = content;
+
+    await item.save();
+
+    return new Promise((resolve, reject) => {
+      resolve({ content: content });
+    });
   }
 }

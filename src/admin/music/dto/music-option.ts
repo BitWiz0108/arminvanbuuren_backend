@@ -4,6 +4,7 @@ export class MusicOption {
   readonly title: string;
   readonly releaseDate: string;
   readonly artistName: string;
+  readonly searchKey: string;
 }
 
 export class MusicInputArg {
@@ -11,6 +12,8 @@ export class MusicInputArg {
   userId: number;
   musicFile: string;
   musicFileCompressed: string;
+  videoBackground: string;
+  videoBackgroundCompressed: string;
   coverImage: string;
   isExclusive: boolean;
   albumIds: string;

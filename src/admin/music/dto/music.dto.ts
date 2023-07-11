@@ -15,6 +15,8 @@ export class MusicWithAlbumIds {
   coverImage: string;
   musicFile: string;
   musicFileCompressed: string;
+  videoBackground: string;
+  videoBackgroundCompressed: string;
   isExclusive: boolean;
   albums: Album[];
   albumIds: number[];

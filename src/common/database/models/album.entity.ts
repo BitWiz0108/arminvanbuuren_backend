@@ -56,6 +56,12 @@ export class Album extends Model {
   @Column({ field: 'is_verified' })
   isVerified: boolean;
 
+  @Column({ field: 'video_background' })
+  videoBackground: string;
+
+  @Column({ field: 'video_background_compressed' })
+  videoBackgroundCompressed: string;
+  
   @Column
   status: boolean;
 

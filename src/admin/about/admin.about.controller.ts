@@ -12,10 +12,10 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 export class AdminAboutController {
   constructor(private readonly aboutService: AdminAboutService) {}
 
-  @Get('images')
+  @Get()
   @HttpCode(HttpStatus.OK)
-  async loadCoverImages() {
-    return this.aboutService.loadCoverImages();
+  async getAboutData() {
+    return this.aboutService.getAboutData();
   }
 
   @Put('images')
@@ -25,5 +25,13 @@ export class AdminAboutController {
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
     return await this.aboutService.update(files);
+  }
+
+  @Put('connect')
+  @HttpCode(HttpStatus.ACCEPTED)
+  async updateAboutText(
+    @Body() data: any,
+  ) {
+    return await this.aboutService.updateAboutText(data);
   }
 }

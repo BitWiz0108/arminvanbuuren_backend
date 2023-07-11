@@ -5,6 +5,7 @@ import { User } from '@models/user.entity';
 import { UploadToS3Service } from '@common/services/upload-s3.service';
 import { ASSET_TYPE, BUCKET_ACL_TYPE, BUCKET_NAME, MESSAGE } from '@common/constants';
 import { CategoryLivestream } from '@common/database/models/category-livestream.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class AdminCategoryService {
@@ -73,9 +74,21 @@ export class AdminCategoryService {
     });
   }
 
-  async findAll(): Promise<Category[]> {
+  async findAll(op: any): Promise<Category[]> {
+    let options: any = {};
+    if (op.searchKey) {
+      options = {
+        where: {
+          title: {
+            [Op.like]: `%${op.searchKey}%`
+          }
+        }
+      };
+    }
+    
     return this.categoryModel.findAll({
       order: [['releaseDate', 'DESC']],
+      ...options,
       include: [{ model: User, as: 'creator' }],
     });
   }
