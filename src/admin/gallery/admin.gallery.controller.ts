@@ -34,6 +34,13 @@ export class AdminGalleryController {
       return result;
     }
 
+    @Post('rearrange')
+    @HttpCode(HttpStatus.ACCEPTED)
+    async rearrange(@Body() data) {
+      const result = await this.galleryService.rearrange(data);
+      return result;
+    }
+
     @Delete()
     @HttpCode(HttpStatus.ACCEPTED)
     async deleteItem(@Query('id') id: number) {

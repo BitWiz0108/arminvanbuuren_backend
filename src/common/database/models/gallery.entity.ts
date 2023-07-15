@@ -16,6 +16,11 @@ export class Gallery extends Model {
   id: number;
 
   @Column({
+    field: 'order_id',
+  })
+  orderId: number;
+  
+  @Column({
     field: 'type',
     type: DataType.ENUM('IMAGE', 'VIDEO'),
   })
