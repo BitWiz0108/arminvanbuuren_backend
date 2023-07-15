@@ -12,7 +12,9 @@ export class GalleryService {
   ) {}
   
   async getAllGalleryImages(): Promise<GalleryDto> {
-    const images = await this.galleryModel.findAll();
+    const images = await this.galleryModel.findAll({
+      order: [['order_id', 'ASC']],
+    });
     const result: GalleryDto = {
       images: images,
     }
