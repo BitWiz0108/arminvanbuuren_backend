@@ -88,6 +88,12 @@ export class AdminPlaylistService {
           userId: 1,
         }
       };
+    } else {
+      options = {
+        where: {
+          userId: 1,
+        }
+      }
     }
     return this.playlistModel.findAll({
       order: [['created_at', 'DESC']],
