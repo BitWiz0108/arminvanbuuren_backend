@@ -84,7 +84,8 @@ export class AdminPlaylistService {
         where: {
           name: {
             [Op.like]: `%${op.searchKey}%`
-          }
+          },
+          userId: 1,
         }
       };
     }
