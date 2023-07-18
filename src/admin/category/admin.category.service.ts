@@ -79,7 +79,7 @@ export class AdminCategoryService {
     if (op.searchKey) {
       options = {
         where: {
-          title: {
+          name: {
             [Op.like]: `%${op.searchKey}%`
           }
         }

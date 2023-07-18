@@ -28,6 +28,7 @@ import { AdminPrayerRequestModule } from './prayer-request/admin.prayer-request.
 import { AdminLoginBackgroundModule } from './login-background/admin.login-background.module';
 import { AdminCategoryModule } from './category/admin.category.module';
 import { AdminOAuthModule } from './oauth/admin.oauth.module';
+import { AdminPlaylistModule } from './playlist/admin.playlist.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { AdminOAuthModule } from './oauth/admin.oauth.module';
     AdminCategoryModule,
     AdminOAuthModule,
     AdminPrayerRequestModule,
+    AdminPlaylistModule,
   ],
   controllers: [],
   providers: [

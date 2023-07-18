@@ -107,7 +107,7 @@ export class AdminAlbumService {
     if (op.searchKey) {
       options = {
         where: {
-          title: {
+          name: {
             [Op.like]: `%${op.searchKey}%`
           }
         }

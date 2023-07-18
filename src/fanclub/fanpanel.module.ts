@@ -13,6 +13,7 @@ import { AboutModule } from './about/about.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { HomeModule } from './home/home.module';
 import { PrayerRequestModule } from './prayer-request/prayer-request.module';
+import { PlaylistModule } from './playlist/playlist.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PrayerRequestModule } from './prayer-request/prayer-request.module';
     GalleryModule,
     HomeModule,
     PrayerRequestModule,
+    PlaylistModule,
   ],
   controllers: [],
   providers: [],
